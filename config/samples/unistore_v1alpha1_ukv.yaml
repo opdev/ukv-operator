@@ -1,0 +1,12 @@
+apiVersion: unistore.unum.cloud/v1alpha1
+kind: UKV
+metadata:
+  labels:
+    app.kubernetes.io/name: ukv
+    app.kubernetes.io/instance: ukv-sample
+    app.kubernetes.io/part-of: ukv-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ukv-operator
+  name: ukv-sample
+spec:
+  # TODO(user): Add fields here
