@@ -1,0 +1,9 @@
+domain: unum.cloud
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: ukv-operator
+repo: github.com/itroyano/ukv-operator
+version: "3"
