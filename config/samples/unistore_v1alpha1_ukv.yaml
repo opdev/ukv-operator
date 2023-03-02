@@ -9,8 +9,8 @@ metadata:
     app.kubernetes.io/created-by: ukv-operator
   name: ukv-sample
 spec:
-  dbcontainerimage: "docker.io/unum/ukv:latest"
-  dbservicename: "ukv"
-  dbserviceport: 38709
-  dbtype: "UMem"
+  dbContainerImage: "docker.io/unum/ukv:latest"
+  dbServiceName: "ukv"
+  dbServicePort: 38709
+  dbType: "UMem"
 

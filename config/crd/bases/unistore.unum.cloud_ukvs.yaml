@@ -35,19 +35,33 @@ spec:
           spec:
             description: UKVSpec defines the desired state of UKV
             properties:
-              dbcontainerimage:
+              dbContainerImage:
                 type: string
-              dbservicename:
+              dbServiceName:
                 type: string
-              dbserviceport:
+              dbServicePort:
                 type: integer
-              dbtype:
+              dbType:
                 type: string
-              persistencestorageclass:
+              persistenceStorageClass:
                 type: string
             type: object
           status:
             description: UKVStatus defines the observed state of UKV
+            properties:
+              deploymentName:
+                type: string
+              deploymentStatus:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: string
+              serviceName:
+                type: string
+              servicePort:
+                type: integer
+              serviceStatus:
+                type: string
             type: object
         type: object
     served: true

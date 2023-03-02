@@ -77,9 +77,6 @@ func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	if errSvc := r.reconcileService(ctx, &ukvResource); errSvc != nil {
 		return ctrl.Result{}, errSvc
 	}
-	//	if err = r.updateUKVStatus(ctx, &ukvResource); err != nil {
-	//		return ctrl.Result{}, err
-	//	}
 
 	return ctrl.Result{}, nil
 }
@@ -95,8 +92,19 @@ func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *un
 		err = r.Create(ctx, desiredDeployment)
 		if err != nil {
 			logger.Error(err, "Failed to create new Deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
+			ukvResource.Status.DeploymentStatus = "Failed Creation"
+			_ = r.Status().Update(ctx, ukvResource)
 			return err
 		}
+		// update status for deployment
+		ukvResource.Status.DeploymentName = desiredDeployment.Name
+		ukvResource.Status.DeploymentStatus = "Successful"
+		err := r.Status().Update(ctx, ukvResource)
+		if err != nil {
+			logger.Error(err, "Failed to update UKV Deployment status")
+			return err
+		}
+
 	}
 	// TODO: implement r.Update(ctx, found) logic for ensuring the desired state is equal to current state
 
@@ -114,19 +122,25 @@ func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unist
 		err = r.Create(ctx, desiredService)
 		if err != nil {
 			logger.Error(err, "Failed to create new Service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
+			ukvResource.Status.ServiceStatus = "Failed Creation"
+			_ = r.Status().Update(ctx, ukvResource)
+			return err
+		}
+		// update status for service
+		ukvResource.Status.ServiceName = desiredService.Name + "." + desiredService.Namespace + ".svc.cluster.local"
+		ukvResource.Status.ServicePort = ukvResource.Spec.DBServicePort
+		ukvResource.Status.ServiceStatus = "Successful"
+		err := r.Status().Update(ctx, ukvResource)
+		if err != nil {
+			logger.Error(err, "Failed to update UKV Service status")
 			return err
 		}
 	}
 
-	// TODO: implement r.Update(ctx, found) logic for ensuring the desired state is equal to current state
+	// TODO: implement r.Update(ctx, foundSvc) logic for ensuring the desired state is equal to current state
 
 	return nil
 
-}
-
-func (r *UKVReconciler) updateUKVStatus(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
-	// TODO: status logic for success & failure
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
