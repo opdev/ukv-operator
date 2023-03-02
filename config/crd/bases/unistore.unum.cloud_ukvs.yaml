@@ -40,7 +40,6 @@ spec:
               dbservicename:
                 type: string
               dbserviceport:
-                format: int32
                 type: integer
               dbtype:
                 type: string

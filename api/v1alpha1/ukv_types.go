@@ -31,7 +31,7 @@ type UKVSpec struct {
 	DBContainerImage        string `json:"dbcontainerimage,omitempty"`
 	DBType                  string `json:"dbtype,omitempty"` // UMem or UDisk
 	DBServiceName           string `json:"dbservicename,omitempty"`
-	DBServicePort           int32  `json:"dbserviceport,omitempty"`
+	DBServicePort           int    `json:"dbserviceport,omitempty"`
 	PersistenceStorageClass string `json:"persistencestorageclass,omitempty"` // For a UDisk type, provide the K8S Storage Class Name
 }
 
