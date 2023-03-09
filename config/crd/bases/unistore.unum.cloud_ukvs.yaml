@@ -64,11 +64,9 @@ spec:
                   of cluster Important: Run "make" to regenerate code after modifying
                   this file'
                 type: string
-              serviceName:
-                type: string
-              servicePort:
-                type: integer
               serviceStatus:
+                type: string
+              serviceUrl:
                 type: string
             type: object
         type: object

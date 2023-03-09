@@ -47,8 +47,7 @@ type UKVStatus struct {
 	DeploymentStatus string `json:"deploymentStatus,omitempty"`
 	DeploymentName   string `json:"deploymentName,omitempty"`
 	ServiceStatus    string `json:"serviceStatus,omitempty"`
-	ServiceName      string `json:"serviceName,omitempty"`
-	ServicePort      int    `json:"servicePort,omitempty"`
+	ServiceUrl       string `json:"serviceUrl,omitempty"`
 }
 
 //+kubebuilder:object:root=true

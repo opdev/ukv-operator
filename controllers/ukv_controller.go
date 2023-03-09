@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"strconv"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -127,8 +128,7 @@ func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unist
 			return err
 		}
 		// update status for service
-		ukvResource.Status.ServiceName = desiredService.Name + "." + desiredService.Namespace + ".svc.cluster.local"
-		ukvResource.Status.ServicePort = ukvResource.Spec.DBServicePort
+		ukvResource.Status.ServiceUrl = desiredService.Name + "." + desiredService.Namespace + ".svc.cluster.local" + ":" + strconv.Itoa(ukvResource.Spec.DBServicePort)
 		ukvResource.Status.ServiceStatus = "Successful"
 		err := r.Status().Update(ctx, ukvResource)
 		if err != nil {
