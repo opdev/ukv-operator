@@ -28,11 +28,16 @@ type UKVSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	DBContainerImage        string `json:"dbContainerImage,omitempty"`
+	// +kubebuilder:validation:Required
 	DBType                  string `json:"dbType,omitempty"` // UMem or UDisk
+	DBContainerImage        string `json:"dbContainerImage,omitempty"`
 	DBServiceName           string `json:"dbServiceName,omitempty"`
 	DBServicePort           int    `json:"dbServicePort,omitempty"`
 	PersistenceStorageClass string `json:"persistenceStorageClass,omitempty"` // For a UDisk type, provide the K8S Storage Class Name
+	PersistenceSize         int    `json:"persistenceSize,omitempty"`
+	DBConfigMapName         string `json:"dbConfigMapName,omitempty"`
+	//+kubebuilder:default:=1
+	NumOfInstances int32 `json:"numOfInstances,omitempty"`
 }
 
 // UKVStatus defines the observed state of UKV

@@ -35,6 +35,8 @@ spec:
           spec:
             description: UKVSpec defines the desired state of UKV
             properties:
+              dbConfigMapName:
+                type: string
               dbContainerImage:
                 type: string
               dbServiceName:
@@ -43,6 +45,12 @@ spec:
                 type: integer
               dbType:
                 type: string
+              numOfInstances:
+                default: 1
+                format: int32
+                type: integer
+              persistenceSize:
+                type: integer
               persistenceStorageClass:
                 type: string
             type: object

@@ -15,3 +15,6 @@
 vendor/
 bin/
 bundle/
+
+# IDE specific files
+.vscode/

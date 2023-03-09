@@ -4,6 +4,7 @@ import (
 	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -11,7 +12,15 @@ import (
 // deploymentForUKV returns a UKV Deployment object
 func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *appsv1.Deployment {
 	labels := labelsForUKV(ukvResource.Name)
-	replicas := int32(1) //TODO: parametrize this in CRD
+	replicas := ukvResource.Spec.NumOfInstances
+	resourceRequests := corev1.ResourceList{
+		corev1.ResourceCPU:    resource.MustParse("200m"),
+		corev1.ResourceMemory: resource.MustParse("100m"),
+	}
+	resourceLimits := corev1.ResourceList{
+		corev1.ResourceCPU:    resource.MustParse("1"),
+		corev1.ResourceMemory: resource.MustParse("1Gi"),
+	}
 	deployment := &appsv1.Deployment{
 		ObjectMeta: SetObjectMeta(ukvResource.Name, ukvResource.Namespace, map[string]string{}),
 		Spec: appsv1.DeploymentSpec{
@@ -27,6 +36,10 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 					Containers: []corev1.Container{{
 						Image: getUKVImage(ukvResource),
 						Name:  "ukv",
+						Resources: corev1.ResourceRequirements{
+							Limits:   resourceLimits,
+							Requests: resourceRequests,
+						},
 					}},
 				},
 			},
