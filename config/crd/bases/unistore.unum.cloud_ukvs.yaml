@@ -39,11 +39,17 @@ spec:
                 type: string
               dbConfigMapName:
                 type: string
-              dbConfigMountPath:
-                type: string
               dbServicePort:
                 type: integer
               dbType:
+                enum:
+                - leveldb
+                - leveldb_server
+                - rocksdb
+                - rocksdb_server
+                - udisk
+                - umem
+                - umem_server
                 type: string
               memoryLimit:
                 type: string

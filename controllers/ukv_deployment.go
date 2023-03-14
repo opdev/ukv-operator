@@ -40,7 +40,7 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 						Name:  "ukv",
 						VolumeMounts: []corev1.VolumeMount{{
 							Name:      "config",
-							MountPath: ukvResource.Spec.DBConfigMountPath,
+							MountPath: "/var/lib/ukv/" + ukvResource.Spec.DBType,
 						}},
 						Resources: corev1.ResourceRequirements{
 							Limits:   resourceLimits,
@@ -49,7 +49,7 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 						Env: []corev1.EnvVar{
 							{
 								Name:  "dir",
-								Value: ukvResource.Spec.DBConfigMountPath,
+								Value: "/var/lib/ukv/" + ukvResource.Spec.DBType,
 							},
 							{
 								Name:  "port",

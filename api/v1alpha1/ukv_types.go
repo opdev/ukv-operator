@@ -28,12 +28,11 @@ type UKVSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// +kubebuilder:validation:Required
+	//+kubebuilder:validation:Enum:="leveldb";"leveldb_server";"rocksdb";"rocksdb_server";"udisk";"umem";"umem_server"
 	DBType string `json:"dbType,omitempty"`
 	// +kubebuilder:validation:Required
 	DBConfigMapName         string `json:"dbConfigMapName,omitempty"`
-	DBConfigMountPath       string `json:"dbConfigMountPath,omitempty"`
-	DBServicePort           int    `json:"dbServicePort,omitempty"`           // add this as an env var too
+	DBServicePort           int    `json:"dbServicePort,omitempty"`
 	PersistenceStorageClass string `json:"persistenceStorageClass,omitempty"` // list of storages. not just one
 	PersistenceSize         int    `json:"persistenceSize,omitempty"`
 	//+kubebuilder:default:=1

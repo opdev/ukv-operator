@@ -10,9 +10,8 @@ metadata:
   name: ukv-sample
 spec:
   dbServicePort: 38709
-  dbType: "UMem"
+  dbType: "umem"
   dbConfigMapName: "sample-config"
-  dbConfigMountPath: "/var/lib/ukv/udisk"
   memoryLimit: "1Gi"
   concurrencyLimit: "1"
   
