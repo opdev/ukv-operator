@@ -29,15 +29,17 @@ type UKVSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +kubebuilder:validation:Required
-	DBType                  string `json:"dbType,omitempty"` // UMem or UDisk
-	DBContainerImage        string `json:"dbContainerImage,omitempty"`
-	DBServiceName           string `json:"dbServiceName,omitempty"`
-	DBServicePort           int    `json:"dbServicePort,omitempty"`
-	PersistenceStorageClass string `json:"persistenceStorageClass,omitempty"` // For a UDisk type, provide the K8S Storage Class Name
-	PersistenceSize         int    `json:"persistenceSize,omitempty"`
+	DBType string `json:"dbType,omitempty"`
+	// +kubebuilder:validation:Required
 	DBConfigMapName         string `json:"dbConfigMapName,omitempty"`
+	DBConfigMountPath       string `json:"dbConfigMountPath,omitempty"`
+	DBServicePort           int    `json:"dbServicePort,omitempty"`           // add this as an env var too
+	PersistenceStorageClass string `json:"persistenceStorageClass,omitempty"` // list of storages. not just one
+	PersistenceSize         int    `json:"persistenceSize,omitempty"`
 	//+kubebuilder:default:=1
-	NumOfInstances int32 `json:"numOfInstances,omitempty"`
+	NumOfInstances   int32  `json:"numOfInstances,omitempty"`   // remove (for data science there is a use case) ?
+	MemoryLimit      string `json:"memoryLimit,omitempty"`      // memory limit on pod.   1/2 of this is request.
+	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"` // cpu limit on pod. 1/2 of this is request.
 }
 
 // UKVStatus defines the observed state of UKV

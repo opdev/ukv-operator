@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -115,7 +116,7 @@ func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *un
 func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
 	var logger = log.FromContext(ctx)
 	foundSvc := &corev1.Service{}
-	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Spec.DBServiceName, Namespace: ukvResource.Namespace}, foundSvc)
+	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, foundSvc)
 	if err != nil && errors.IsNotFound(err) {
 		// A new service needs to be created
 		desiredService := r.serviceForUKV(ukvResource)
@@ -135,9 +136,24 @@ func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unist
 			logger.Error(err, "Failed to update UKV Service status")
 			return err
 		}
+		return nil // done creating a new service
 	}
 
-	// TODO: implement r.Update(ctx, foundSvc) logic for ensuring the desired state is equal to current state
+	if foundSvc.Spec.Ports[0].Port != int32(ukvResource.Spec.DBServicePort) {
+		foundSvc.Spec.Ports[0].Port = int32(ukvResource.Spec.DBServicePort)
+		foundSvc.Spec.Ports[0].TargetPort = intstr.FromInt(ukvResource.Spec.DBServicePort)
+		err := r.Update(ctx, foundSvc)
+		if err != nil {
+			logger.Error(err, "Failed to update UKV Service")
+			ukvResource.Status.ServiceStatus = "Failed"
+			_ = r.Status().Update(ctx, ukvResource)
+			return err
+		}
+		// update the status to show the correct url
+		ukvResource.Status.ServiceUrl = foundSvc.Name + "." + foundSvc.Namespace + ".svc.cluster.local" + ":" + strconv.Itoa(ukvResource.Spec.DBServicePort)
+		ukvResource.Status.ServiceStatus = "Successful"
+		_ = r.Status().Update(ctx, ukvResource)
+	}
 
 	return nil
 

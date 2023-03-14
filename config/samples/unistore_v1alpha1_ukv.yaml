@@ -9,8 +9,11 @@ metadata:
     app.kubernetes.io/created-by: ukv-operator
   name: ukv-sample
 spec:
-  dbContainerImage: "docker.io/unum/ukv:latest"
-  dbServiceName: "ukv"
   dbServicePort: 38709
   dbType: "UMem"
+  dbConfigMapName: "sample-config"
+  dbConfigMountPath: "/var/lib/ukv/udisk"
+  memoryLimit: "1Gi"
+  concurrencyLimit: "1"
+  
 

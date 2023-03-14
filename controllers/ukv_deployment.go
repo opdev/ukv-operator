@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strconv"
+
 	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,8 +20,8 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 		corev1.ResourceMemory: resource.MustParse("100m"),
 	}
 	resourceLimits := corev1.ResourceList{
-		corev1.ResourceCPU:    resource.MustParse("1"),
-		corev1.ResourceMemory: resource.MustParse("1Gi"),
+		corev1.ResourceCPU:    resource.MustParse(ukvResource.Spec.ConcurrencyLimit),
+		corev1.ResourceMemory: resource.MustParse(ukvResource.Spec.MemoryLimit),
 	}
 	deployment := &appsv1.Deployment{
 		ObjectMeta: SetObjectMeta(ukvResource.Name, ukvResource.Namespace, map[string]string{}),
@@ -36,9 +38,32 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 					Containers: []corev1.Container{{
 						Image: getUKVImage(ukvResource),
 						Name:  "ukv",
+						VolumeMounts: []corev1.VolumeMount{{
+							Name:      "config",
+							MountPath: ukvResource.Spec.DBConfigMountPath,
+						}},
 						Resources: corev1.ResourceRequirements{
 							Limits:   resourceLimits,
 							Requests: resourceRequests,
+						},
+						Env: []corev1.EnvVar{
+							{
+								Name:  "dir",
+								Value: ukvResource.Spec.DBConfigMountPath,
+							},
+							{
+								Name:  "port",
+								Value: strconv.Itoa(ukvResource.Spec.DBServicePort),
+							}},
+					}},
+					Volumes: []corev1.Volume{{
+						Name: "config",
+						VolumeSource: corev1.VolumeSource{
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: ukvResource.Spec.DBConfigMapName,
+								},
+							},
 						},
 					}},
 				},

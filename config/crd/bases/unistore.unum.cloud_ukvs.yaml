@@ -35,15 +35,17 @@ spec:
           spec:
             description: UKVSpec defines the desired state of UKV
             properties:
+              concurrencyLimit:
+                type: string
               dbConfigMapName:
                 type: string
-              dbContainerImage:
-                type: string
-              dbServiceName:
+              dbConfigMountPath:
                 type: string
               dbServicePort:
                 type: integer
               dbType:
+                type: string
+              memoryLimit:
                 type: string
               numOfInstances:
                 default: 1

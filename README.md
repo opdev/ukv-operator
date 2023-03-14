@@ -16,6 +16,7 @@ image name: quay.io/itroyano/ukv-operator
 ### Testing
 ```
 make deploy
+oc apply -f config/samples/sample-config.yaml
 oc apply -f config/samples/unistore_v1alpha1_ukv.yaml 
 ```
 ### Cleanup
