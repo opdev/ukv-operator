@@ -54,7 +54,8 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 							{
 								Name:  "port",
 								Value: strconv.Itoa(ukvResource.Spec.DBServicePort),
-							}},
+							},
+						},
 					}},
 					Volumes: []corev1.Volume{{
 						Name: "config",
@@ -73,10 +74,9 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 	// Set UKV instance as the owner and controller
 	ctrl.SetControllerReference(ukvResource, deployment, r.Scheme)
 	return deployment
-
 }
 
 func getUKVImage(ukvResource *unistorev1alpha1.UKV) string {
-	//TODO: conditions based on ukvResource.Spec.DBType.  for now just return latest umem for testing.
+	// TODO: conditions based on ukvResource.Spec.DBType.  for now just return latest umem for testing.
 	return "docker.io/unum/ukv:latest"
 }

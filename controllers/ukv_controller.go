@@ -56,7 +56,7 @@ type UKVReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	var logger = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
 	var ukvResource unistorev1alpha1.UKV
 
@@ -84,7 +84,7 @@ func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 }
 
 func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
-	var logger = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 	found := &appsv1.Deployment{}
 	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
@@ -114,7 +114,7 @@ func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *un
 }
 
 func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
-	var logger = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 	foundSvc := &corev1.Service{}
 	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, foundSvc)
 	if err != nil && errors.IsNotFound(err) {
@@ -156,7 +156,6 @@ func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unist
 	}
 
 	return nil
-
 }
 
 // SetupWithManager sets up the controller with the Manager.
