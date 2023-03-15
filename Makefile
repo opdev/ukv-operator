@@ -94,8 +94,9 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: fmt
-fmt: ## Run go fmt against code.
-	go fmt ./...
+fmt: gofumpt
+	${GOFUMPT} -l -w .
+	git diff --exit-code
 
 .PHONY: vet
 vet: ## Run go vet against code.
@@ -253,3 +254,17 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+.PHONY: lint
+lint: golangci-lint ## Run golangci-lint linter checks.
+	$(GOLANGCI_LINT) run -v --timeout 4m0s
+
+GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
+GOLANGCI_LINT_VERSION ?= v1.50.0
+.PHONY: golangci-lint
+golangci-lint: ## Download golangci-lint locally if necessary.
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
+
+GOFUMPT = $(shell pwd)/bin/gofumpt
+gofumpt: ## Download envtest-setup locally if necessary.
+	$(call go-install-tool,$(GOFUMPT),mvdan.cc/gofumpt@latest)
