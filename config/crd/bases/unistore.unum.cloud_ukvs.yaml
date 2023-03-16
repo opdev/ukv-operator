@@ -69,8 +69,7 @@ spec:
                     mountPath:
                       type: string
                     size:
-                      type: string
-                    storageClass:
+                      pattern: ^[0-9]{1,4}[KMGTPE]{1}i
                       type: string
                   type: object
                 type: array

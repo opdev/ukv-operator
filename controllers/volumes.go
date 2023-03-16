@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	"strconv"
+	"strings"
 
 	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -21,12 +21,11 @@ type VolumeToMount struct {
 
 var volumeList []VolumeToMount
 
-const pvcNamePrefix = "ukv-db-volume-"
-
 func (r *UKVReconciler) reconcileVolumesForUKV(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
 	logger := log.FromContext(ctx)
-	for index, volume := range ukvResource.Spec.Volumes {
-		name := pvcNamePrefix + strconv.Itoa(index)
+	for _, volume := range ukvResource.Spec.Volumes {
+		mountName := strings.ReplaceAll(volume.MountPath, "/", "-")
+		name := ukvResource.Name + mountName + "-volume"
 		if err := r.getOrCreatePersistence(ctx, name, volume, ukvResource); err != nil {
 			logger.Error(err, "Failed to reconcile PVC")
 			return err
@@ -43,11 +42,10 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 		// create a PVC
 		logger.Info("Creating a new PVC", "Namespace", ukvResource.Namespace, "Name", name)
 		pvcmode := corev1.PersistentVolumeFilesystem
-		accessMode := corev1.PersistentVolumeAccessMode("ReadWriteOnce")
 		pvc := &corev1.PersistentVolumeClaim{
 			ObjectMeta: SetObjectMeta(name, ukvResource.Namespace, map[string]string{}),
 			Spec: corev1.PersistentVolumeClaimSpec{
-				AccessModes: []corev1.PersistentVolumeAccessMode{accessMode},
+				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.PersistentVolumeAccessMode(vol.AccessMode)},
 				VolumeMode:  &pvcmode,
 				Resources: corev1.ResourceRequirements{
 					Requests: corev1.ResourceList{
@@ -68,14 +66,14 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 			logger.Error(err, "Failed to create PVC", name)
 			return err
 		}
-	}
 
-	listedVolume := VolumeToMount{
-		Name:      "db-" + name,
-		ClaimName: name,
-		MountPath: vol.MountPath,
+		listedVolume := VolumeToMount{
+			Name:      name,
+			ClaimName: name,
+			MountPath: vol.MountPath,
+		}
+		volumeList = append(volumeList, listedVolume)
 	}
-	volumeList = append(volumeList, listedVolume)
 	return nil
 }
 

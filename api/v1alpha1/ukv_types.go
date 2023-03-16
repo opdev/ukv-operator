@@ -42,9 +42,9 @@ type UKVSpec struct {
 
 // defines a persistence used by the DB
 type Persistence struct {
-	StorageClass string `json:"storageClass,omitempty"`
-	Size         string `json:"size,omitempty"`
-	MountPath    string `json:"mountPath,omitempty"`
+	// +kubebuilder:validation:Pattern:="^[0-9]{1,4}[KMGTPE]{1}i"
+	Size      string `json:"size,omitempty"` // Size of the requested volume in Gi, Mi, Ti etc'
+	MountPath string `json:"mountPath,omitempty"`
 	//+kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
 	AccessMode string `json:"accessMode,omitempty"`
 }

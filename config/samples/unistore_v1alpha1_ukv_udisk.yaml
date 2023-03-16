@@ -18,9 +18,3 @@ spec:
     - size: 10Gi
       accessMode: ReadWriteOnce
       mountPath: /mnt/disk1/
-      storageClass: default
-
-
-      
-  
-
