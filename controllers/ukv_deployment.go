@@ -71,9 +71,29 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 			},
 		},
 	}
+	r.addVolumesIfNeeded(deployment, ukvResource)
 	// Set UKV instance as the owner and controller
 	ctrl.SetControllerReference(ukvResource, deployment, r.Scheme)
 	return deployment
+}
+
+func (r *UKVReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ukvResource *unistorev1alpha1.UKV) {
+	for _, volumeMount := range r.GetVolumeList() {
+		containerMount := corev1.VolumeMount{
+			Name:      volumeMount.Name,
+			MountPath: volumeMount.MountPath,
+		}
+		volume := corev1.Volume{
+			Name: volumeMount.Name,
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: volumeMount.ClaimName,
+				},
+			},
+		}
+		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, containerMount)
+		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
+	}
 }
 
 func getUKVImage(ukvResource *unistorev1alpha1.UKV) string {

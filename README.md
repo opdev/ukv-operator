@@ -11,7 +11,10 @@ IMAGE_BUILDER=docker #its podman by default
 make docker-build
 make docker-push
 ```
-image name: quay.io/itroyano/ukv-operator
+
+A push to main triggers image build GH Action.
+
+#### image name: quay.io/itroyano/ukv-operator
 
 ### Testing
 ```

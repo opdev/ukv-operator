@@ -57,10 +57,23 @@ spec:
                 default: 1
                 format: int32
                 type: integer
-              persistenceSize:
-                type: integer
-              persistenceStorageClass:
-                type: string
+              volumes:
+                items:
+                  description: defines a persistence used by the DB
+                  properties:
+                    accessMode:
+                      enum:
+                      - ReadWriteOnce
+                      - ReadWriteMany
+                      type: string
+                    mountPath:
+                      type: string
+                    size:
+                      type: string
+                    storageClass:
+                      type: string
+                  type: object
+                type: array
             type: object
           status:
             description: UKVStatus defines the observed state of UKV

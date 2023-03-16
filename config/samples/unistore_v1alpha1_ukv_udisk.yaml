@@ -1,0 +1,26 @@
+apiVersion: unistore.unum.cloud/v1alpha1
+kind: UKV
+metadata:
+  labels:
+    app.kubernetes.io/name: ukv
+    app.kubernetes.io/instance: ukv-sample-udisk
+    app.kubernetes.io/part-of: ukv-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ukv-operator
+  name: ukv-sample-udisk
+spec:
+  dbServicePort: 38709
+  dbType: "udisk"
+  dbConfigMapName: "sample-config"
+  memoryLimit: "1Gi"
+  concurrencyLimit: "1"
+  volumes:
+    - size: 10Gi
+      accessMode: ReadWriteOnce
+      mountPath: /mnt/disk1/
+      storageClass: default
+
+
+      
+  
+

@@ -73,6 +73,10 @@ func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		return ctrl.Result{}, err
 	}
 
+	if errorVol := r.reconcileVolumesForUKV(ctx, &ukvResource); errorVol != nil {
+		return ctrl.Result{}, errorVol
+	}
+
 	if errorDep := r.reconcileDeployment(ctx, &ukvResource); errorDep != nil {
 		return ctrl.Result{}, errorDep
 	}

@@ -31,14 +31,22 @@ type UKVSpec struct {
 	//+kubebuilder:validation:Enum:="leveldb";"leveldb_server";"rocksdb";"rocksdb_server";"udisk";"umem";"umem_server"
 	DBType string `json:"dbType,omitempty"`
 	// +kubebuilder:validation:Required
-	DBConfigMapName         string `json:"dbConfigMapName,omitempty"`
-	DBServicePort           int    `json:"dbServicePort,omitempty"`
-	PersistenceStorageClass string `json:"persistenceStorageClass,omitempty"` // list of storages. not just one
-	PersistenceSize         int    `json:"persistenceSize,omitempty"`
+	DBConfigMapName string        `json:"dbConfigMapName,omitempty"`
+	DBServicePort   int           `json:"dbServicePort,omitempty"`
+	Volumes         []Persistence `json:"volumes,omitempty"`
 	//+kubebuilder:default:=1
 	NumOfInstances   int32  `json:"numOfInstances,omitempty"`   // remove (for data science there is a use case) ?
 	MemoryLimit      string `json:"memoryLimit,omitempty"`      // memory limit on pod.   1/2 of this is request.
 	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"` // cpu limit on pod. 1/2 of this is request.
+}
+
+// defines a persistence used by the DB
+type Persistence struct {
+	StorageClass string `json:"storageClass,omitempty"`
+	Size         string `json:"size,omitempty"`
+	MountPath    string `json:"mountPath,omitempty"`
+	//+kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
+	AccessMode string `json:"accessMode,omitempty"`
 }
 
 // UKVStatus defines the observed state of UKV
