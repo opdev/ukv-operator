@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/imdario/mergo"
 	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -91,10 +92,10 @@ func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
 	logger := log.FromContext(ctx)
 	found := &appsv1.Deployment{}
+	desiredDeployment := r.deploymentForUKV(ukvResource)
 	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		// A new deployment needs to be created
-		desiredDeployment := r.deploymentForUKV(ukvResource)
 		logger.Info("Creating a new Deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
 		err = r.Create(ctx, desiredDeployment)
 		if err != nil {
@@ -111,10 +112,28 @@ func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *un
 			logger.Error(err, "Failed to update UKV Deployment status")
 			return err
 		}
-
+		return nil
 	}
-	// TODO: implement r.Update(ctx, found) logic for ensuring the desired state is equal to current state
 
+	// patch only if there is a difference between desired and current.
+	patchDiff := client.MergeFrom(found.DeepCopyObject().(client.Object))
+	if err := mergo.Merge(found, desiredDeployment, mergo.WithOverride); err != nil {
+		logger.Error(err, "Error in merge")
+		return err
+	}
+
+	if err := r.Patch(ctx, found, patchDiff); err != nil {
+		logger.Error(err, "Failed to update Deployment to desired state", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
+		return err
+	}
+	// update status for deployment
+	ukvResource.Status.DeploymentName = desiredDeployment.Name
+	ukvResource.Status.DeploymentStatus = "Successful"
+	err = r.Status().Update(ctx, ukvResource)
+	if err != nil {
+		logger.Error(err, "Failed to update UKV Deployment status")
+		return err
+	}
 	return nil
 }
 
@@ -169,6 +188,7 @@ func (r *UKVReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&unistorev1alpha1.UKV{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
+		Owns(&corev1.PersistentVolumeClaim{}).
 		Complete(r)
 }
 

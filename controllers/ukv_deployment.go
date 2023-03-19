@@ -17,7 +17,7 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 	replicas := ukvResource.Spec.NumOfInstances
 	resourceRequests := corev1.ResourceList{
 		corev1.ResourceCPU:    resource.MustParse("200m"),
-		corev1.ResourceMemory: resource.MustParse("100m"),
+		corev1.ResourceMemory: resource.MustParse("100Mi"),
 	}
 	resourceLimits := corev1.ResourceList{
 		corev1.ResourceCPU:    resource.MustParse(ukvResource.Spec.ConcurrencyLimit),
@@ -79,20 +79,22 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 
 func (r *UKVReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ukvResource *unistorev1alpha1.UKV) {
 	for _, volumeMount := range r.GetVolumeList() {
-		containerMount := corev1.VolumeMount{
-			Name:      volumeMount.Name,
-			MountPath: volumeMount.MountPath,
-		}
-		volume := corev1.Volume{
-			Name: volumeMount.Name,
-			VolumeSource: corev1.VolumeSource{
-				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-					ClaimName: volumeMount.ClaimName,
+		if volumeMount.Owner == ukvResource.Name {
+			containerMount := corev1.VolumeMount{
+				Name:      volumeMount.Name,
+				MountPath: volumeMount.MountPath,
+			}
+			volume := corev1.Volume{
+				Name: volumeMount.Name,
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: volumeMount.ClaimName,
+					},
 				},
-			},
+			}
+			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, containerMount)
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
 		}
-		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, containerMount)
-		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
 	}
 }
 

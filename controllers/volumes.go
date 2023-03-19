@@ -17,6 +17,7 @@ type VolumeToMount struct {
 	Name      string
 	ClaimName string
 	MountPath string
+	Owner     string
 }
 
 var volumeList []VolumeToMount
@@ -66,17 +67,29 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 			logger.Error(err, "Failed to create PVC", name)
 			return err
 		}
-
-		listedVolume := VolumeToMount{
-			Name:      name,
-			ClaimName: name,
-			MountPath: vol.MountPath,
-		}
+	}
+	listedVolume := VolumeToMount{
+		Name:      name,
+		ClaimName: name,
+		MountPath: vol.MountPath,
+		Owner:     ukvResource.Name,
+	}
+	if !containsVolume(volumeList, listedVolume) {
 		volumeList = append(volumeList, listedVolume)
 	}
+
 	return nil
 }
 
 func (r *UKVReconciler) GetVolumeList() []VolumeToMount {
 	return volumeList
+}
+
+func containsVolume(slice []VolumeToMount, element VolumeToMount) bool {
+	for _, a := range slice {
+		if a == element {
+			return true
+		}
+	}
+	return false
 }
