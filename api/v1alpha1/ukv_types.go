@@ -24,7 +24,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // UKVSpec defines the desired state of UKV
-// +kubebuilder:validation:XValidation:rule="!has(oldSelf.dbType) || has(self.dbType)", message="Value is required once set"
+// +kubebuilder:validation:XValidation:rule="!has(oldSelf.dbType) || has(self.dbType)", message="DB Type value is required once set"
 type UKVSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -37,15 +37,15 @@ type UKVSpec struct {
 	DBServicePort   int           `json:"dbServicePort,omitempty"`
 	Volumes         []Persistence `json:"volumes,omitempty"`
 	// +kubebuilder:default:=1
-	NumOfInstances int32 `json:"numOfInstances,omitempty"` // remove (for data science there is a use case) ?
-	// +kubebuilder:validation:Pattern:="^[0-9]{1,4}[KMG]{1}i"
-	MemoryLimit      string `json:"memoryLimit,omitempty"`      // memory limit on pod.   1/2 of this is request.
-	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"` // cpu limit on pod. 1/2 of this is request.
+	NumOfInstances int32 `json:"numOfInstances,omitempty"` // consider remove (for data science there is a use case) ?
+	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMG]{1}i"
+	MemoryLimit      string `json:"memoryLimit,omitempty"`      // memory limit on pod.
+	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"` // cpu limit on pod.
 }
 
 // defines a persistence used by the DB
 type Persistence struct {
-	// +kubebuilder:validation:Pattern:="^[0-9]{1,4}[KMGTPE]{1}i"
+	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMGTPE]{1}i"
 	Size      string `json:"size,omitempty"` // Size of the requested volume in Gi, Mi, Ti etc'
 	MountPath string `json:"mountPath,omitempty"`
 	// +kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"

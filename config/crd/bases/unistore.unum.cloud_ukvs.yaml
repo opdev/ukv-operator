@@ -55,7 +55,7 @@ spec:
                 - message: Value is immutable
                   rule: self == oldSelf
               memoryLimit:
-                pattern: ^[0-9]{1,4}[KMG]{1}i
+                pattern: ^[1-9][0-9]{0,3}[KMG]{1}i
                 type: string
               numOfInstances:
                 default: 1
@@ -73,13 +73,13 @@ spec:
                     mountPath:
                       type: string
                     size:
-                      pattern: ^[0-9]{1,4}[KMGTPE]{1}i
+                      pattern: ^[1-9][0-9]{0,3}[KMGTPE]{1}i
                       type: string
                   type: object
                 type: array
             type: object
             x-kubernetes-validations:
-            - message: Value is required once set
+            - message: DB Type value is required once set
               rule: '!has(oldSelf.dbType) || has(self.dbType)'
           status:
             description: UKVStatus defines the observed state of UKV
