@@ -51,7 +51,11 @@ spec:
                 - umem
                 - umem_server
                 type: string
+                x-kubernetes-validations:
+                - message: Value is immutable
+                  rule: self == oldSelf
               memoryLimit:
+                pattern: ^[0-9]{1,4}[KMG]{1}i
                 type: string
               numOfInstances:
                 default: 1
@@ -74,6 +78,9 @@ spec:
                   type: object
                 type: array
             type: object
+            x-kubernetes-validations:
+            - message: Value is required once set
+              rule: '!has(oldSelf.dbType) || has(self.dbType)'
           status:
             description: UKVStatus defines the observed state of UKV
             properties:

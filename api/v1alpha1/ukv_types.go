@@ -24,18 +24,21 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // UKVSpec defines the desired state of UKV
+// +kubebuilder:validation:XValidation:rule="!has(oldSelf.dbType) || has(self.dbType)", message="Value is required once set"
 type UKVSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	//+kubebuilder:validation:Enum:="leveldb";"leveldb_server";"rocksdb";"rocksdb_server";"udisk";"umem";"umem_server"
+	// +kubebuilder:validation:Enum:="leveldb";"leveldb_server";"rocksdb";"rocksdb_server";"udisk";"umem";"umem_server"
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable"
 	DBType string `json:"dbType,omitempty"`
 	// +kubebuilder:validation:Required
 	DBConfigMapName string        `json:"dbConfigMapName,omitempty"`
 	DBServicePort   int           `json:"dbServicePort,omitempty"`
 	Volumes         []Persistence `json:"volumes,omitempty"`
-	//+kubebuilder:default:=1
-	NumOfInstances   int32  `json:"numOfInstances,omitempty"`   // remove (for data science there is a use case) ?
+	// +kubebuilder:default:=1
+	NumOfInstances int32 `json:"numOfInstances,omitempty"` // remove (for data science there is a use case) ?
+	// +kubebuilder:validation:Pattern:="^[0-9]{1,4}[KMG]{1}i"
 	MemoryLimit      string `json:"memoryLimit,omitempty"`      // memory limit on pod.   1/2 of this is request.
 	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"` // cpu limit on pod. 1/2 of this is request.
 }
@@ -45,7 +48,7 @@ type Persistence struct {
 	// +kubebuilder:validation:Pattern:="^[0-9]{1,4}[KMGTPE]{1}i"
 	Size      string `json:"size,omitempty"` // Size of the requested volume in Gi, Mi, Ti etc'
 	MountPath string `json:"mountPath,omitempty"`
-	//+kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
+	// +kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
 	AccessMode string `json:"accessMode,omitempty"`
 }
 
