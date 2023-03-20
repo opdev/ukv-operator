@@ -2,10 +2,13 @@
 A Go Operator for creating and managing instances of Unum UniStore UKV.
 
 For more information on what is an Operator, visit 
-https://kubernetes.io/docs/concepts/architecture/controller/
-https://kubernetes.io/docs/concepts/extend-kubernetes/#extension-patterns
+- https://kubernetes.io/docs/concepts/architecture/controller/
+- https://kubernetes.io/docs/concepts/extend-kubernetes/#extension-patterns
+- https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
 
-This operator was built using Operator SDK. please see: https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/
+This operator was built using Operator SDK. please see: 
+- https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/
+
 
 ## Running on a cluster and testing
 
