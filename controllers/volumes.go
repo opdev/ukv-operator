@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
+	"github.com/itroyano/ukv-operator/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -44,7 +45,7 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 		logger.Info("Creating a new PVC", "Namespace", ukvResource.Namespace, "Name", name)
 		pvcmode := corev1.PersistentVolumeFilesystem
 		pvc := &corev1.PersistentVolumeClaim{
-			ObjectMeta: SetObjectMeta(name, ukvResource.Namespace, map[string]string{}),
+			ObjectMeta: utils.SetObjectMeta(name, ukvResource.Namespace, map[string]string{}),
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.PersistentVolumeAccessMode(vol.AccessMode)},
 				VolumeMode:  &pvcmode,

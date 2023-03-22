@@ -36,12 +36,17 @@ spec:
             description: UKVSpec defines the desired state of UKV
             properties:
               concurrencyLimit:
+                description: Concurrency (cores) limit for this UKV.
                 type: string
               dbConfigMapName:
+                description: DB Config Map name is required.
                 type: string
               dbServicePort:
+                description: DB Port to connect clients.
                 type: integer
               dbType:
+                description: DB Type defines the type of DB from a list of supported
+                  types. This is mandatory and immutable once set.
                 enum:
                 - leveldb
                 - leveldb_server
@@ -55,6 +60,7 @@ spec:
                 - message: Value is immutable
                   rule: self == oldSelf
               memoryLimit:
+                description: Memory limit for this UKV.
                 pattern: ^[1-9][0-9]{0,3}[KMG]{1}i
                 type: string
               numOfInstances:
@@ -62,6 +68,8 @@ spec:
                 format: int32
                 type: integer
               volumes:
+                description: List of persistent volumes to be attached. Required by
+                  some DB Types.
                 items:
                   description: defines a persistence used by the DB
                   properties:
@@ -73,6 +81,7 @@ spec:
                     mountPath:
                       type: string
                     size:
+                      description: Size of the requested volume in Gi, Mi, Ti etc'
                       pattern: ^[1-9][0-9]{0,3}[KMGTPE]{1}i
                       type: string
                   type: object

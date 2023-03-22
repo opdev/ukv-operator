@@ -18,21 +18,16 @@ package controllers
 
 import (
 	"context"
-	"strconv"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/imdario/mergo"
 	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // UKVReconciler reconciles a UKV object
@@ -89,99 +84,6 @@ func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	return ctrl.Result{}, nil
 }
 
-func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
-	logger := log.FromContext(ctx)
-	found := &appsv1.Deployment{}
-	desiredDeployment := r.deploymentForUKV(ukvResource)
-	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		// A new deployment needs to be created
-		logger.Info("Creating a new Deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
-		err = r.Create(ctx, desiredDeployment)
-		if err != nil {
-			logger.Error(err, "Failed to create new Deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
-			ukvResource.Status.DeploymentStatus = "Failed Creation"
-			_ = r.Status().Update(ctx, ukvResource)
-			return err
-		}
-		// update status for deployment
-		ukvResource.Status.DeploymentName = desiredDeployment.Name
-		ukvResource.Status.DeploymentStatus = "Successful"
-		err := r.Status().Update(ctx, ukvResource)
-		if err != nil {
-			logger.Error(err, "Failed to update UKV Deployment status")
-			return err
-		}
-		return nil
-	}
-
-	// patch only if there is a difference between desired and current.
-	patchDiff := client.MergeFrom(found.DeepCopyObject().(client.Object))
-	if err := mergo.Merge(found, desiredDeployment, mergo.WithOverride); err != nil {
-		logger.Error(err, "Error in merge")
-		return err
-	}
-
-	if err := r.Patch(ctx, found, patchDiff); err != nil {
-		logger.Error(err, "Failed to update Deployment to desired state", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
-		return err
-	}
-	// update status for deployment
-	ukvResource.Status.DeploymentName = desiredDeployment.Name
-	ukvResource.Status.DeploymentStatus = "Successful"
-	err = r.Status().Update(ctx, ukvResource)
-	if err != nil {
-		logger.Error(err, "Failed to update UKV Deployment status")
-		return err
-	}
-	return nil
-}
-
-func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
-	logger := log.FromContext(ctx)
-	foundSvc := &corev1.Service{}
-	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, foundSvc)
-	if err != nil && errors.IsNotFound(err) {
-		// A new service needs to be created
-		desiredService := r.serviceForUKV(ukvResource)
-		logger.Info("Creating a new Service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
-		err = r.Create(ctx, desiredService)
-		if err != nil {
-			logger.Error(err, "Failed to create new Service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
-			ukvResource.Status.ServiceStatus = "Failed Creation"
-			_ = r.Status().Update(ctx, ukvResource)
-			return err
-		}
-		// update status for service
-		ukvResource.Status.ServiceUrl = desiredService.Name + "." + desiredService.Namespace + ".svc.cluster.local" + ":" + strconv.Itoa(ukvResource.Spec.DBServicePort)
-		ukvResource.Status.ServiceStatus = "Successful"
-		err := r.Status().Update(ctx, ukvResource)
-		if err != nil {
-			logger.Error(err, "Failed to update UKV Service status")
-			return err
-		}
-		return nil // done creating a new service
-	}
-
-	if foundSvc.Spec.Ports[0].Port != int32(ukvResource.Spec.DBServicePort) {
-		foundSvc.Spec.Ports[0].Port = int32(ukvResource.Spec.DBServicePort)
-		foundSvc.Spec.Ports[0].TargetPort = intstr.FromInt(ukvResource.Spec.DBServicePort)
-		err := r.Update(ctx, foundSvc)
-		if err != nil {
-			logger.Error(err, "Failed to update UKV Service")
-			ukvResource.Status.ServiceStatus = "Failed"
-			_ = r.Status().Update(ctx, ukvResource)
-			return err
-		}
-		// update the status to show the correct url
-		ukvResource.Status.ServiceUrl = foundSvc.Name + "." + foundSvc.Namespace + ".svc.cluster.local" + ":" + strconv.Itoa(ukvResource.Spec.DBServicePort)
-		ukvResource.Status.ServiceStatus = "Successful"
-		_ = r.Status().Update(ctx, ukvResource)
-	}
-
-	return nil
-}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *UKVReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
@@ -190,19 +92,4 @@ func (r *UKVReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Owns(&corev1.PersistentVolumeClaim{}).
 		Complete(r)
-}
-
-// labelsForUKV returns the labels for selecting the resources
-// belonging to the given UKV resource name.
-func labelsForUKV(name string) map[string]string {
-	return map[string]string{"app": "ukv", "ownerInstance": name}
-}
-
-func SetObjectMeta(name string, namespace string, labels map[string]string) metav1.ObjectMeta {
-	objectMeta := metav1.ObjectMeta{
-		Name:      name,
-		Namespace: namespace,
-		Labels:    labels,
-	}
-	return objectMeta
 }

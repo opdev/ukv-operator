@@ -29,24 +29,35 @@ type UKVSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// DB Type defines the type of DB from a list of supported types. This is mandatory and immutable once set.
 	// +kubebuilder:validation:Enum:="leveldb";"leveldb_server";"rocksdb";"rocksdb_server";"udisk";"umem";"umem_server"
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable"
 	DBType string `json:"dbType,omitempty"`
+
+	// DB Config Map name is required.
 	// +kubebuilder:validation:Required
-	DBConfigMapName string        `json:"dbConfigMapName,omitempty"`
-	DBServicePort   int           `json:"dbServicePort,omitempty"`
-	Volumes         []Persistence `json:"volumes,omitempty"`
+	DBConfigMapName string `json:"dbConfigMapName,omitempty"`
+
+	// DB Port to connect clients.
+	DBServicePort int `json:"dbServicePort,omitempty"`
+
+	// List of persistent volumes to be attached. Required by some DB Types.
+	Volumes []Persistence `json:"volumes,omitempty"`
 	// +kubebuilder:default:=1
-	NumOfInstances int32 `json:"numOfInstances,omitempty"` // consider remove (for data science there is a use case) ?
+	NumOfInstances int32 `json:"numOfInstances,omitempty"`
+
+	// Memory limit for this UKV.
 	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMG]{1}i"
-	MemoryLimit      string `json:"memoryLimit,omitempty"`      // memory limit on pod.
-	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"` // cpu limit on pod.
+	MemoryLimit string `json:"memoryLimit,omitempty"` // memory limit on pod.
+	// Concurrency (cores) limit for this UKV.
+	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"`
 }
 
 // defines a persistence used by the DB
 type Persistence struct {
+	// Size of the requested volume in Gi, Mi, Ti etc'
 	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMGTPE]{1}i"
-	Size      string `json:"size,omitempty"` // Size of the requested volume in Gi, Mi, Ti etc'
+	Size      string `json:"size,omitempty"`
 	MountPath string `json:"mountPath,omitempty"`
 	// +kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
 	AccessMode string `json:"accessMode,omitempty"`
