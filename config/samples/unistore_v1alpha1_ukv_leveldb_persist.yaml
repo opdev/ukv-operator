@@ -3,18 +3,18 @@ kind: UKV
 metadata:
   labels:
     app.kubernetes.io/name: ukv
-    app.kubernetes.io/instance: ukv-sample-udisk
+    app.kubernetes.io/instance: ukv-sample-leveldb
     app.kubernetes.io/part-of: ukv-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: ukv-operator
-  name: ukv-sample-udisk
+  name: ukv-sample-leveldb
 spec:
   dbServicePort: 38709
-  dbType: "udisk"
-  dbConfigMapName: "sample-config-udisk"
+  dbType: "leveldb"
+  dbConfigMapName: "sample-config-leveldb"
   memoryLimit: "1Gi"
   concurrencyLimit: "1"
   volumes:
-    - size: 10Gi
+    - size: 5Gi
       accessMode: ReadWriteOnce
       mountPath: /mnt/disk1/

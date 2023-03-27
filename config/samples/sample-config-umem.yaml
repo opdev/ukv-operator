@@ -1,0 +1,15 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sample-config-umem
+data:
+  config.json: |-
+    {
+    "version": "1.0",
+    "directory": "/var/lib/ukv/",
+    "engine": {
+        "config_url": "",
+        "config_file_path": "",
+        "config": {}
+    }
+    }

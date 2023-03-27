@@ -49,12 +49,9 @@ spec:
                   types. This is mandatory and immutable once set.
                 enum:
                 - leveldb
-                - leveldb_server
                 - rocksdb
-                - rocksdb_server
                 - udisk
                 - umem
-                - umem_server
                 type: string
                 x-kubernetes-validations:
                 - message: Value is immutable

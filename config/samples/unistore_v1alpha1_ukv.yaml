@@ -11,7 +11,7 @@ metadata:
 spec:
   dbServicePort: 38709
   dbType: "umem"
-  dbConfigMapName: "sample-config"
+  dbConfigMapName: "sample-config-umem"
   memoryLimit: "1Gi"
   concurrencyLimit: "1"
   
