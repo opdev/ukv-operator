@@ -3,7 +3,7 @@ module github.com/itroyano/ukv-operator
 go 1.19
 
 require (
-	github.com/imdario/mergo v0.3.12
+	github.com/imdario/mergo v0.3.15
 	github.com/onsi/ginkgo/v2 v2.9.1
 	github.com/onsi/gomega v1.27.4
 	k8s.io/api v0.26.3
