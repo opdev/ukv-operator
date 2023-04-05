@@ -93,9 +93,18 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 					Containers: []corev1.Container{{
 						Image: getUKVImage(ukvResource),
 						Name:  "ukv",
+						Command: []string{
+							"./" + ukvResource.Spec.DBType + "_server",
+						},
+						Args: []string{
+							"--config",
+							"$(DBCONFIG)",
+							"--port",
+							"$(DBPORT)",
+						},
 						VolumeMounts: []corev1.VolumeMount{{
 							Name:      "config",
-							MountPath: "/var/lib/ukv/" + ukvResource.Spec.DBType,
+							MountPath: "/var/lib/ukv/" + ukvResource.Spec.DBType + "/",
 						}},
 						Resources: corev1.ResourceRequirements{
 							Limits:   resourceLimits,
@@ -103,11 +112,11 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 						},
 						Env: []corev1.EnvVar{
 							{
-								Name:  "dir",
-								Value: "/var/lib/ukv/" + ukvResource.Spec.DBType,
+								Name:  "DBCONFIG",
+								Value: "/var/lib/ukv/" + ukvResource.Spec.DBType + "/config.json",
 							},
 							{
-								Name:  "port",
+								Name:  "DBPORT",
 								Value: strconv.Itoa(ukvResource.Spec.DBServicePort),
 							},
 						},

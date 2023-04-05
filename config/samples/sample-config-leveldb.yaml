@@ -1,0 +1,30 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sample-config-leveldb
+data:
+  config.json: |-
+    {
+    "version": "1.0",
+    "directory": "/var/lib/ukv/",
+    "data_directories": [
+        {
+            "path": "./mnt/disk1/",
+            "max_size": "5GB"
+        },
+    ],
+    "engine": {
+        "config_url": "",
+        "config_file_path": "",
+        "config": {
+            "write_buffer_size": 134217728,
+            "max_file_size": 134217728,
+            "max_open_files": -1,
+            "cache_size": 200000,
+            "create_if_missing": true,
+            "error_if_exists": false,
+            "paranoid_checks": false,
+            "compression": null
+        }
+    }
+    }

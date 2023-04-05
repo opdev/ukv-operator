@@ -18,7 +18,7 @@ If you wish to debug see the "debugging" section below, and either scale down th
 
 Next, deploy the user input Custom Resource example Config Map and UKV yaml:
 ```
-oc apply -f config/samples/sample-config.yaml
+oc apply -f config/samples/sample-config-umem.yaml
 oc apply -f config/samples/unistore_v1alpha1_ukv.yaml 
 ```
 Note: there are more yamls under `config/samples`

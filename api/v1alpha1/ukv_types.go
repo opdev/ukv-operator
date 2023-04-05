@@ -30,7 +30,7 @@ type UKVSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// DB Type defines the type of DB from a list of supported types. This is mandatory and immutable once set.
-	// +kubebuilder:validation:Enum:="leveldb";"leveldb_server";"rocksdb";"rocksdb_server";"udisk";"umem";"umem_server"
+	// +kubebuilder:validation:Enum:="leveldb";"rocksdb";"udisk";"umem";
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable"
 	DBType string `json:"dbType,omitempty"`
 
