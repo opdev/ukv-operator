@@ -1,0 +1,47 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: ukv-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: UKV is the Schema for the ukvs API
+      displayName: UKV
+      kind: UKV
+      name: ukvs.unistore.unum.cloud
+      version: v1alpha1
+  description: A Go Operator for creating and managing instances of Unum UniStore
+    UKV
+  displayName: UKV Operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - database
+  - key value
+  links:
+  - name: Ukv Operator
+    url: https://github.com/itroyano/ukv-operator
+  maturity: alpha
+  provider:
+    name: Unum
+    url: https://unum.cloud
+  version: 0.0.0

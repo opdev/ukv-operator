@@ -39,6 +39,27 @@ make docker-push
 
 ### A push to main branch, triggers image build GH Action. image name: quay.io/itroyano/ukv-operator
 
+## Operator Lifecycle Manager (OLM) Bundle and OpenShift Marketplace integration
+
+To generate bundle manifests use `make bundle`.
+Observe `config/manifests/bases/ukv-operator.clusterserviceversion.yaml` and the `bundle` folder.
+
+To build the bundle image which can be tested, certified and pushed to marketplace use 
+```
+IMAGE_BUILDER=docker #its podman by default
+IMAGE_TAG_BASE=<name of image. will be appended with -bundle>
+make bundle-build
+make bundle-push
+```
+
+This image can then be added to a test catalog for local testing only
+```
+make catalog-build
+make catalog-push
+```
+
+
+
 ### Debugging in VSCode
 ```
 {
