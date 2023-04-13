@@ -6,16 +6,10 @@ data:
   config.json: |-
     {
     "version": "1.0",
-    "directory": "/var/lib/ukv/",
-    "data_directories": [
-        {
-            "path": "./mnt/disk1/",
-            "max_size": "5GB"
-        },
-    ],
+    "directory": "/mnt/disk1/",
+    "data_directories": [],
     "engine": {
         "config_url": "",
-        "config_file_path": "",
         "config": {
             "write_buffer_size": 134217728,
             "max_file_size": 134217728,
