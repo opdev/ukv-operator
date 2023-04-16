@@ -58,7 +58,8 @@ make catalog-build
 make catalog-push
 ```
 
-
+For more information please see
+-  https://sdk.operatorframework.io/docs/olm-integration/tutorial-bundle/
 
 ### Debugging in VSCode
 ```
