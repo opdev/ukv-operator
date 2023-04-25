@@ -51,16 +51,30 @@ type UKVSpec struct {
 	MemoryLimit string `json:"memoryLimit,omitempty"` // memory limit on pod.
 	// Concurrency (cores) limit for this UKV.
 	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"`
+
+	// Optionally define labels for an affinity to run UKV on specific cluster nodes.
+	NodeAffinityLabels []NodeAffinityLabel `json:"nodeAffinityLabels,omitempty"`
 }
 
-// defines a persistence used by the DB
+// Defines a persistence used by the DB
 type Persistence struct {
 	// Size of the requested volume in Gi, Mi, Ti etc'
 	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMGTPE]{1}i"
-	Size      string `json:"size,omitempty"`
+	Size string `json:"size,omitempty"`
+	// Path to mount inside UKV container. This must correspond with the data path in config map.
 	MountPath string `json:"mountPath,omitempty"`
 	// +kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
 	AccessMode string `json:"accessMode,omitempty"`
+}
+
+// Defines affinity used by UKV. learn more in https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+type NodeAffinityLabel struct {
+	// Label key of the cluster nodes to match
+	Label string `json:"label,omitempty"`
+	// Label value of the cluster nodes to match
+	Value string `json:"value,omitempty"`
+	// Weight of this preference in the range 1-100
+	Weight int32 `json:"weight,omitempty"`
 }
 
 // UKVStatus defines the observed state of UKV

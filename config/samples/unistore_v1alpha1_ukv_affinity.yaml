@@ -1,0 +1,23 @@
+apiVersion: unistore.unum.cloud/v1alpha1
+kind: UKV
+metadata:
+  labels:
+    app.kubernetes.io/name: ukv
+    app.kubernetes.io/instance: ukv-sample
+    app.kubernetes.io/part-of: ukv-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ukv-operator
+  name: ukv-sample-affinity
+spec:
+  dbServicePort: 38709
+  dbType: "umem"
+  dbConfigMapName: "sample-config-umem"
+  memoryLimit: "10Gi"
+  concurrencyLimit: "1"
+  nodeAffinityLabels:
+    - label: "node.kubernetes.io/instance-type"
+      value: "m5.2xlarge"
+      weight: 1
+    - label: "node.kubernetes.io/instance-type"
+      value: "m5.xlarge"
+      weight: 50

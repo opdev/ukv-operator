@@ -60,6 +60,24 @@ spec:
                 description: Memory limit for this UKV.
                 pattern: ^[1-9][0-9]{0,3}[KMG]{1}i
                 type: string
+              nodeAffinityLabels:
+                description: Optionally define labels for an affinity to run UKV on
+                  specific cluster nodes.
+                items:
+                  description: Defines affinity used by UKV. learn more in https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+                  properties:
+                    label:
+                      description: Label key of the cluster nodes to match
+                      type: string
+                    value:
+                      description: Label value of the cluster nodes to match
+                      type: string
+                    weight:
+                      description: Weight of this preference in the range 1-100
+                      format: int32
+                      type: integer
+                  type: object
+                type: array
               numOfInstances:
                 default: 1
                 format: int32
@@ -68,7 +86,7 @@ spec:
                 description: List of persistent volumes to be attached. Required by
                   some DB Types.
                 items:
-                  description: defines a persistence used by the DB
+                  description: Defines a persistence used by the DB
                   properties:
                     accessMode:
                       enum:
@@ -76,6 +94,8 @@ spec:
                       - ReadWriteMany
                       type: string
                     mountPath:
+                      description: Path to mount inside UKV container. This must correspond
+                        with the data path in config map.
                       type: string
                     size:
                       description: Size of the requested volume in Gi, Mi, Ti etc'

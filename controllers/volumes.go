@@ -45,7 +45,7 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 		logger.Info("Creating a new PVC", "Namespace", ukvResource.Namespace, "Name", name)
 		pvcmode := corev1.PersistentVolumeFilesystem
 		pvc := &corev1.PersistentVolumeClaim{
-			ObjectMeta: utils.SetObjectMeta(name, ukvResource.Namespace, map[string]string{}),
+			ObjectMeta: utils.SetObjectMeta(name, ukvResource.Namespace, utils.LabelsForUKV(ukvResource.Name)),
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.PersistentVolumeAccessMode(vol.AccessMode)},
 				VolumeMode:  &pvcmode,

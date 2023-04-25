@@ -136,6 +136,7 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 		},
 	}
 	r.addVolumesIfNeeded(deployment, ukvResource)
+	r.addAffinityIfNeeded(deployment, ukvResource)
 	// Set UKV instance as the owner and controller
 	ctrl.SetControllerReference(ukvResource, deployment, r.Scheme)
 	return deployment
@@ -158,6 +159,35 @@ func (r *UKVReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ukvRes
 			}
 			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, containerMount)
 			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
+		}
+	}
+}
+
+func (r *UKVReconciler) addAffinityIfNeeded(deployment *appsv1.Deployment, ukvResource *unistorev1alpha1.UKV) {
+	if len(ukvResource.Spec.NodeAffinityLabels) > 0 {
+
+		preferredSchedulingTerms := []corev1.PreferredSchedulingTerm{}
+
+		for _, labelKeyValue := range ukvResource.Spec.NodeAffinityLabels {
+			term := corev1.PreferredSchedulingTerm{
+				Weight: labelKeyValue.Weight,
+				Preference: corev1.NodeSelectorTerm{
+					MatchExpressions: []corev1.NodeSelectorRequirement{
+						{
+							Key:      labelKeyValue.Label,
+							Operator: corev1.NodeSelectorOpIn,
+							Values:   []string{labelKeyValue.Value},
+						},
+					},
+				},
+			}
+			preferredSchedulingTerms = append(preferredSchedulingTerms, term)
+		}
+
+		deployment.Spec.Template.Spec.Affinity = &corev1.Affinity{
+			NodeAffinity: &corev1.NodeAffinity{
+				PreferredDuringSchedulingIgnoredDuringExecution: preferredSchedulingTerms,
+			},
 		}
 	}
 }
