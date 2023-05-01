@@ -63,7 +63,7 @@ func (r *UKVReconciler) reconcileService(ctx context.Context, ukvResource *unist
 // serviceForUKV returns a UKV Service object
 func (r *UKVReconciler) serviceForUKV(ukvResource *unistorev1alpha1.UKV) *corev1.Service {
 	service := &corev1.Service{
-		ObjectMeta: utils.SetObjectMeta(ukvResource.Name, ukvResource.Namespace, map[string]string{}),
+		ObjectMeta: utils.SetObjectMeta(ukvResource.Name, ukvResource.Namespace, utils.LabelsForUKV(ukvResource.Name)),
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
 				Name:       "db",
