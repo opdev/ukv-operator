@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
+	unumv1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	"github.com/itroyano/ukv-operator/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -23,12 +23,12 @@ type VolumeToMount struct {
 
 var volumeList []VolumeToMount
 
-func (r *UKVReconciler) reconcileVolumesForUKV(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
+func (r *UStoreReconciler) reconcileVolumesForUStore(ctx context.Context, ustoreResource *unumv1alpha1.UStore) error {
 	logger := log.FromContext(ctx)
-	for _, volume := range ukvResource.Spec.Volumes {
+	for _, volume := range ustoreResource.Spec.Volumes {
 		mountName := strings.ReplaceAll(volume.MountPath, "/", "-")
-		name := ukvResource.Name + mountName + "-volume"
-		if err := r.getOrCreatePersistence(ctx, name, volume, ukvResource); err != nil {
+		name := ustoreResource.Name + mountName + "-volume"
+		if err := r.getOrCreatePersistence(ctx, name, volume, ustoreResource); err != nil {
 			logger.Error(err, "Failed to reconcile PVC")
 			return err
 		}
@@ -36,16 +36,16 @@ func (r *UKVReconciler) reconcileVolumesForUKV(ctx context.Context, ukvResource 
 	return nil
 }
 
-func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string, vol unistorev1alpha1.Persistence, ukvResource *unistorev1alpha1.UKV) error {
+func (r *UStoreReconciler) getOrCreatePersistence(ctx context.Context, name string, vol unumv1alpha1.Persistence, ustoreResource *unumv1alpha1.UStore) error {
 	logger := log.FromContext(ctx)
 	foundPvc := &corev1.PersistentVolumeClaim{}
-	err := r.Get(ctx, types.NamespacedName{Name: name, Namespace: ukvResource.Namespace}, foundPvc)
+	err := r.Get(ctx, types.NamespacedName{Name: name, Namespace: ustoreResource.Namespace}, foundPvc)
 	if err != nil && errors.IsNotFound(err) {
 		// create a PVC
-		logger.Info("Creating a new PVC", "Namespace", ukvResource.Namespace, "Name", name)
+		logger.Info("Creating a new PVC", "Namespace", ustoreResource.Namespace, "Name", name)
 		pvcmode := corev1.PersistentVolumeFilesystem
 		pvc := &corev1.PersistentVolumeClaim{
-			ObjectMeta: utils.SetObjectMeta(name, ukvResource.Namespace, utils.LabelsForUKV(ukvResource.Name)),
+			ObjectMeta: utils.SetObjectMeta(name, ustoreResource.Namespace, utils.LabelsForUStore(ustoreResource.Name)),
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.PersistentVolumeAccessMode(vol.AccessMode)},
 				VolumeMode:  &pvcmode,
@@ -56,8 +56,8 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 				},
 			},
 		}
-		// Set ukv instance as the owner and controller
-		if err := ctrl.SetControllerReference(ukvResource, pvc, r.Scheme); err != nil {
+		// Set ustore instance as the owner and controller
+		if err := ctrl.SetControllerReference(ustoreResource, pvc, r.Scheme); err != nil {
 			logger.Error(err, "Failed to set owner reference on PVC", name)
 			return err
 		}
@@ -73,7 +73,7 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 		Name:      name,
 		ClaimName: name,
 		MountPath: vol.MountPath,
-		Owner:     ukvResource.Name,
+		Owner:     ustoreResource.Name,
 	}
 	if !containsVolume(volumeList, listedVolume) {
 		volumeList = append(volumeList, listedVolume)
@@ -82,7 +82,7 @@ func (r *UKVReconciler) getOrCreatePersistence(ctx context.Context, name string,
 	return nil
 }
 
-func (r *UKVReconciler) GetVolumeList() []VolumeToMount {
+func (r *UStoreReconciler) GetVolumeList() []VolumeToMount {
 	return volumeList
 }
 

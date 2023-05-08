@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
+	unumv1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	"github.com/itroyano/ukv-operator/controllers"
 	//+kubebuilder:scaffold:imports
 )
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(unistorev1alpha1.AddToScheme(scheme))
+	utilruntime.Must(unumv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -89,11 +89,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.UKVReconciler{
+	if err = (&controllers.UStoreReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "UKV")
+		setupLog.Error(err, "unable to create controller", "controller", "UStore")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

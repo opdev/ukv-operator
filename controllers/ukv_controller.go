@@ -25,20 +25,20 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
+	unumv1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
-// UKVReconciler reconciles a UKV object
-type UKVReconciler struct {
+// UStoreReconciler reconciles a UStore object
+type UStoreReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=unistore.unum.cloud,resources=ukvs,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=unistore.unum.cloud,resources=ukvs/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=unistore.unum.cloud,resources=ukvs/finalizers,verbs=update
+//+kubebuilder:rbac:groups=unum.cloud,resources=ustores,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=unum.cloud,resources=ustores/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=unum.cloud,resources=ustores/finalizers,verbs=update
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
@@ -46,38 +46,38 @@ type UKVReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the UKV object against the actual cluster state, and then
+// the UStore object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *UStoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	var ukvResource unistorev1alpha1.UKV
+	var ustoreResource unumv1alpha1.UStore
 
-	if err := r.Get(ctx, req.NamespacedName, &ukvResource); err != nil {
+	if err := r.Get(ctx, req.NamespacedName, &ustoreResource); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			logger.Info("UKV resource not found. Ignoring since object must be deleted")
+			logger.Info("UStore resource not found. Ignoring since object must be deleted")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		logger.Error(err, "Failed to get UKV resource")
+		logger.Error(err, "Failed to get UStore resource")
 		return ctrl.Result{}, err
 	}
 
-	if errorVol := r.reconcileVolumesForUKV(ctx, &ukvResource); errorVol != nil {
+	if errorVol := r.reconcileVolumesForUStore(ctx, &ustoreResource); errorVol != nil {
 		return ctrl.Result{}, errorVol
 	}
 
-	if errorDep := r.reconcileDeployment(ctx, &ukvResource); errorDep != nil {
+	if errorDep := r.reconcileDeployment(ctx, &ustoreResource); errorDep != nil {
 		return ctrl.Result{}, errorDep
 	}
-	if errSvc := r.reconcileService(ctx, &ukvResource); errSvc != nil {
+	if errSvc := r.reconcileService(ctx, &ustoreResource); errSvc != nil {
 		return ctrl.Result{}, errSvc
 	}
 
@@ -85,9 +85,9 @@ func (r *UKVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *UKVReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *UStoreReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&unistorev1alpha1.UKV{}).
+		For(&unumv1alpha1.UStore{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.PersistentVolumeClaim{}).

@@ -1,13 +1,13 @@
-apiVersion: unistore.unum.cloud/v1alpha1
-kind: UKV
+apiVersion: unum.cloud/v1alpha1
+kind: UStore
 metadata:
   labels:
-    app.kubernetes.io/name: ukv
-    app.kubernetes.io/instance: ukv-sample-leveldb
+    app.kubernetes.io/name: ustore
+    app.kubernetes.io/instance: ustore-sample-leveldb
     app.kubernetes.io/part-of: ukv-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: ukv-operator
-  name: ukv-sample-leveldb
+  name: ustore-sample-leveldb
 spec:
   dbServicePort: 38709
   dbType: "leveldb"

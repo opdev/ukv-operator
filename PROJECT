@@ -11,9 +11,9 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: unum.cloud
-  group: unistore
-  kind: UKV
+  domain: cloud
+  group: unum
+  kind: ustore
   path: github.com/itroyano/ukv-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

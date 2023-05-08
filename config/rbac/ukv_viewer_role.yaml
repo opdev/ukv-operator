@@ -1,4 +1,4 @@
-# permissions for end users to view ukvs.
+# permissions for end users to view ustores.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -12,16 +12,16 @@ metadata:
   name: ukv-viewer-role
 rules:
 - apiGroups:
-  - unistore.unum.cloud
+  - unum.cloud
   resources:
-  - ukvs
+  - ustores
   verbs:
   - get
   - list
   - watch
 - apiGroups:
-  - unistore.unum.cloud
+  - unum.cloud
   resources:
-  - ukvs/status
+  - ustores/status
   verbs:
   - get
