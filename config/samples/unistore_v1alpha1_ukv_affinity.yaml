@@ -10,8 +10,8 @@ metadata:
   name: ukv-sample-affinity
 spec:
   dbServicePort: 38709
-  dbType: "umem"
-  dbConfigMapName: "sample-config-umem"
+  dbType: "ucset"
+  dbConfigMapName: "sample-config-ucset"
   memoryLimit: "10Gi"
   concurrencyLimit: "1"
   nodeAffinityLabels:

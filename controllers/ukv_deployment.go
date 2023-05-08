@@ -193,6 +193,6 @@ func (r *UKVReconciler) addAffinityIfNeeded(deployment *appsv1.Deployment, ukvRe
 }
 
 func getUKVImage(ukvResource *unistorev1alpha1.UKV) string {
-	// TODO: conditions based on ukvResource.Spec.DBType.  for now just return latest umem for testing.
-	return "docker.io/unum/ukv:latest"
+	// TODO: conditions based on ukvResource.Spec.DBType.  for now just return latest ucset for testing.
+	return "quay.io/gurgen_yegoryan/ustore:0.12.1"
 }
