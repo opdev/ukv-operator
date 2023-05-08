@@ -51,7 +51,7 @@ spec:
                 - leveldb
                 - rocksdb
                 - udisk
-                - umem
+                - ucset
                 type: string
                 x-kubernetes-validations:
                 - message: Value is immutable
