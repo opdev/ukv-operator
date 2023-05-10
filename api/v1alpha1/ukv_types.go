@@ -23,9 +23,9 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// UKVSpec defines the desired state of UKV
+// UStoreSpec defines the desired state of UStore
 // +kubebuilder:validation:XValidation:rule="!has(oldSelf.dbType) || has(self.dbType)", message="DB Type value is required once set"
-type UKVSpec struct {
+type UStoreSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -46,13 +46,13 @@ type UKVSpec struct {
 	// +kubebuilder:default:=1
 	NumOfInstances int32 `json:"numOfInstances,omitempty"`
 
-	// Memory limit for this UKV.
+	// Memory limit for this UStore.
 	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMG]{1}i"
 	MemoryLimit string `json:"memoryLimit,omitempty"` // memory limit on pod.
-	// Concurrency (cores) limit for this UKV.
+	// Concurrency (cores) limit for this UStore.
 	ConcurrencyLimit string `json:"concurrencyLimit,omitempty"`
 
-	// Optionally define labels for an affinity to run UKV on specific cluster nodes.
+	// Optionally define labels for an affinity to run UStore on specific cluster nodes.
 	NodeAffinityLabels []NodeAffinityLabel `json:"nodeAffinityLabels,omitempty"`
 }
 
@@ -61,13 +61,13 @@ type Persistence struct {
 	// Size of the requested volume in Gi, Mi, Ti etc'
 	// +kubebuilder:validation:Pattern:="^[1-9][0-9]{0,3}[KMGTPE]{1}i"
 	Size string `json:"size,omitempty"`
-	// Path to mount inside UKV container. This must correspond with the data path in config map.
+	// Path to mount inside UStore container. This must correspond with the data path in config map.
 	MountPath string `json:"mountPath,omitempty"`
 	// +kubebuilder:validation:Enum:="ReadWriteOnce";"ReadWriteMany"
 	AccessMode string `json:"accessMode,omitempty"`
 }
 
-// Defines affinity used by UKV. learn more in https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+// Defines affinity used by UStore. learn more in https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 type NodeAffinityLabel struct {
 	// Label key of the cluster nodes to match
 	Label string `json:"label,omitempty"`
@@ -77,8 +77,8 @@ type NodeAffinityLabel struct {
 	Weight int32 `json:"weight,omitempty"`
 }
 
-// UKVStatus defines the observed state of UKV
-type UKVStatus struct {
+// UStoreStatus defines the observed state of UStore
+type UStoreStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	DeploymentStatus string `json:"deploymentStatus,omitempty"`
@@ -90,24 +90,24 @@ type UKVStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// UKV is the Schema for the ukvs API
-type UKV struct {
+// UStore is the Schema for the UStores API
+type UStore struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   UKVSpec   `json:"spec,omitempty"`
-	Status UKVStatus `json:"status,omitempty"`
+	Spec   UStoreSpec   `json:"spec,omitempty"`
+	Status UStoreStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// UKVList contains a list of UKV
-type UKVList struct {
+// UStoreList contains a list of UStore
+type UStoreList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []UKV `json:"items"`
+	Items           []UStore `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&UKV{}, &UKVList{})
+	SchemeBuilder.Register(&UStore{}, &UStoreList{})
 }

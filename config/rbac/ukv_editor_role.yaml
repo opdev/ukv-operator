@@ -1,4 +1,4 @@
-# permissions for end users to edit ukvs.
+# permissions for end users to edit ustores.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -12,9 +12,9 @@ metadata:
   name: ukv-editor-role
 rules:
 - apiGroups:
-  - unistore.unum.cloud
+  - unum.cloud
   resources:
-  - ukvs
+  - ustores
   verbs:
   - create
   - delete
@@ -24,8 +24,8 @@ rules:
   - update
   - watch
 - apiGroups:
-  - unistore.unum.cloud
+  - unum.cloud
   resources:
-  - ukvs/status
+  - ustores/status
   verbs:
   - get

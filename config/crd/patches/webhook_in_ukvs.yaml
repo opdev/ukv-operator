@@ -2,7 +2,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: ukvs.unistore.unum.cloud
+  name: ustores.unum.cloud
 spec:
   conversion:
     strategy: Webhook

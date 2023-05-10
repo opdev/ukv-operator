@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/imdario/mergo"
-	unistorev1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
+	unumv1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
 	"github.com/itroyano/ukv-operator/controllers/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,27 +18,27 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *unistorev1alpha1.UKV) error {
+func (r *UStoreReconciler) reconcileDeployment(ctx context.Context, ustoreResource *unumv1alpha1.UStore) error {
 	logger := log.FromContext(ctx)
 	found := &appsv1.Deployment{}
-	desiredDeployment := r.deploymentForUKV(ukvResource)
-	err := r.Get(ctx, types.NamespacedName{Name: ukvResource.Name, Namespace: ukvResource.Namespace}, found)
+	desiredDeployment := r.deploymentForUStore(ustoreResource)
+	err := r.Get(ctx, types.NamespacedName{Name: ustoreResource.Name, Namespace: ustoreResource.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		// A new deployment needs to be created
 		logger.Info("Creating a new Deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
 		err = r.Create(ctx, desiredDeployment)
 		if err != nil {
 			logger.Error(err, "Failed to create new Deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
-			ukvResource.Status.DeploymentStatus = "Failed Creation"
-			_ = r.Status().Update(ctx, ukvResource)
+			ustoreResource.Status.DeploymentStatus = "Failed Creation"
+			_ = r.Status().Update(ctx, ustoreResource)
 			return err
 		}
 		// update status for deployment
-		ukvResource.Status.DeploymentName = desiredDeployment.Name
-		ukvResource.Status.DeploymentStatus = "Successful"
-		err := r.Status().Update(ctx, ukvResource)
+		ustoreResource.Status.DeploymentName = desiredDeployment.Name
+		ustoreResource.Status.DeploymentStatus = "Successful"
+		err := r.Status().Update(ctx, ustoreResource)
 		if err != nil {
-			logger.Error(err, "Failed to update UKV Deployment status")
+			logger.Error(err, "Failed to update UStore Deployment status")
 			return err
 		}
 		return nil
@@ -56,30 +56,30 @@ func (r *UKVReconciler) reconcileDeployment(ctx context.Context, ukvResource *un
 		return err
 	}
 	// update status for deployment
-	ukvResource.Status.DeploymentName = desiredDeployment.Name
-	ukvResource.Status.DeploymentStatus = "Successful"
-	err = r.Status().Update(ctx, ukvResource)
+	ustoreResource.Status.DeploymentName = desiredDeployment.Name
+	ustoreResource.Status.DeploymentStatus = "Successful"
+	err = r.Status().Update(ctx, ustoreResource)
 	if err != nil {
-		logger.Error(err, "Failed to update UKV Deployment status")
+		logger.Error(err, "Failed to update UStore Deployment status")
 		return err
 	}
 	return nil
 }
 
-// deploymentForUKV returns a UKV Deployment object
-func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *appsv1.Deployment {
-	labels := utils.LabelsForUKV(ukvResource.Name)
-	replicas := ukvResource.Spec.NumOfInstances
+// deploymentForUStore returns a UStore Deployment object
+func (r *UStoreReconciler) deploymentForUStore(ustoreResource *unumv1alpha1.UStore) *appsv1.Deployment {
+	labels := utils.LabelsForUStore(ustoreResource.Name)
+	replicas := ustoreResource.Spec.NumOfInstances
 	resourceRequests := corev1.ResourceList{
 		corev1.ResourceCPU:    resource.MustParse("200m"),
 		corev1.ResourceMemory: resource.MustParse("100Mi"),
 	}
 	resourceLimits := corev1.ResourceList{
-		corev1.ResourceCPU:    resource.MustParse(ukvResource.Spec.ConcurrencyLimit),
-		corev1.ResourceMemory: resource.MustParse(ukvResource.Spec.MemoryLimit),
+		corev1.ResourceCPU:    resource.MustParse(ustoreResource.Spec.ConcurrencyLimit),
+		corev1.ResourceMemory: resource.MustParse(ustoreResource.Spec.MemoryLimit),
 	}
 	deployment := &appsv1.Deployment{
-		ObjectMeta: utils.SetObjectMeta(ukvResource.Name, ukvResource.Namespace, map[string]string{}),
+		ObjectMeta: utils.SetObjectMeta(ustoreResource.Name, ustoreResource.Namespace, map[string]string{}),
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
@@ -91,10 +91,10 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image: getUKVImage(ukvResource),
-						Name:  "ukv",
+						Image: getUStoreImage(ustoreResource),
+						Name:  "ustore",
 						Command: []string{
-							"./" + ukvResource.Spec.DBType + "_server",
+							"./" + ustoreResource.Spec.DBType + "_server",
 						},
 						Args: []string{
 							"--config",
@@ -104,7 +104,7 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 						},
 						VolumeMounts: []corev1.VolumeMount{{
 							Name:      "config",
-							MountPath: "/var/lib/ukv/" + ukvResource.Spec.DBType + "/",
+							MountPath: "/var/lib/ustore/" + ustoreResource.Spec.DBType + "/",
 						}},
 						Resources: corev1.ResourceRequirements{
 							Limits:   resourceLimits,
@@ -113,11 +113,11 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 						Env: []corev1.EnvVar{
 							{
 								Name:  "DBCONFIG",
-								Value: "/var/lib/ukv/" + ukvResource.Spec.DBType + "/config.json",
+								Value: "/var/lib/ustore/" + ustoreResource.Spec.DBType + "/config.json",
 							},
 							{
 								Name:  "DBPORT",
-								Value: strconv.Itoa(ukvResource.Spec.DBServicePort),
+								Value: strconv.Itoa(ustoreResource.Spec.DBServicePort),
 							},
 						},
 					}},
@@ -126,7 +126,7 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 						VolumeSource: corev1.VolumeSource{
 							ConfigMap: &corev1.ConfigMapVolumeSource{
 								LocalObjectReference: corev1.LocalObjectReference{
-									Name: ukvResource.Spec.DBConfigMapName,
+									Name: ustoreResource.Spec.DBConfigMapName,
 								},
 							},
 						},
@@ -135,16 +135,16 @@ func (r *UKVReconciler) deploymentForUKV(ukvResource *unistorev1alpha1.UKV) *app
 			},
 		},
 	}
-	r.addVolumesIfNeeded(deployment, ukvResource)
-	r.addAffinityIfNeeded(deployment, ukvResource)
-	// Set UKV instance as the owner and controller
-	ctrl.SetControllerReference(ukvResource, deployment, r.Scheme)
+	r.addVolumesIfNeeded(deployment, ustoreResource)
+	r.addAffinityIfNeeded(deployment, ustoreResource)
+	// Set UStore instance as the owner and controller
+	ctrl.SetControllerReference(ustoreResource, deployment, r.Scheme)
 	return deployment
 }
 
-func (r *UKVReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ukvResource *unistorev1alpha1.UKV) {
+func (r *UStoreReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ustoreResource *unumv1alpha1.UStore) {
 	for _, volumeMount := range r.GetVolumeList() {
-		if volumeMount.Owner == ukvResource.Name {
+		if volumeMount.Owner == ustoreResource.Name {
 			containerMount := corev1.VolumeMount{
 				Name:      volumeMount.Name,
 				MountPath: volumeMount.MountPath,
@@ -163,12 +163,12 @@ func (r *UKVReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ukvRes
 	}
 }
 
-func (r *UKVReconciler) addAffinityIfNeeded(deployment *appsv1.Deployment, ukvResource *unistorev1alpha1.UKV) {
-	if len(ukvResource.Spec.NodeAffinityLabels) > 0 {
+func (r *UStoreReconciler) addAffinityIfNeeded(deployment *appsv1.Deployment, ustoreResource *unumv1alpha1.UStore) {
+	if len(ustoreResource.Spec.NodeAffinityLabels) > 0 {
 
 		preferredSchedulingTerms := []corev1.PreferredSchedulingTerm{}
 
-		for _, labelKeyValue := range ukvResource.Spec.NodeAffinityLabels {
+		for _, labelKeyValue := range ustoreResource.Spec.NodeAffinityLabels {
 			term := corev1.PreferredSchedulingTerm{
 				Weight: labelKeyValue.Weight,
 				Preference: corev1.NodeSelectorTerm{
@@ -192,7 +192,7 @@ func (r *UKVReconciler) addAffinityIfNeeded(deployment *appsv1.Deployment, ukvRe
 	}
 }
 
-func getUKVImage(ukvResource *unistorev1alpha1.UKV) string {
-	// TODO: conditions based on ukvResource.Spec.DBType.  for now just return latest ucset for testing.
+func getUStoreImage(ustoreResource *unumv1alpha1.UStore) string {
+	// TODO: conditions based on ustoreResource.Spec.DBType.  for now just return latest ucset for testing.
 	return "quay.io/gurgen_yegoryan/ustore:0.12.1"
 }

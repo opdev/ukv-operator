@@ -5,20 +5,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.10.0
   creationTimestamp: null
-  name: ukvs.unistore.unum.cloud
+  name: ustores.unum.cloud
 spec:
-  group: unistore.unum.cloud
+  group: unum.cloud
   names:
-    kind: UKV
-    listKind: UKVList
-    plural: ukvs
-    singular: ukv
+    kind: UStore
+    listKind: UStoreList
+    plural: ustores
+    singular: ustore
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: UKV is the Schema for the ukvs API
+        description: UStore is the Schema for the UStores API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -33,10 +33,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: UKVSpec defines the desired state of UKV
+            description: UStoreSpec defines the desired state of UStore
             properties:
               concurrencyLimit:
-                description: Concurrency (cores) limit for this UKV.
+                description: Concurrency (cores) limit for this UStore.
                 type: string
               dbConfigMapName:
                 description: DB Config Map name is required.
@@ -57,14 +57,14 @@ spec:
                 - message: Value is immutable
                   rule: self == oldSelf
               memoryLimit:
-                description: Memory limit for this UKV.
+                description: Memory limit for this UStore.
                 pattern: ^[1-9][0-9]{0,3}[KMG]{1}i
                 type: string
               nodeAffinityLabels:
-                description: Optionally define labels for an affinity to run UKV on
-                  specific cluster nodes.
+                description: Optionally define labels for an affinity to run UStore
+                  on specific cluster nodes.
                 items:
-                  description: Defines affinity used by UKV. learn more in https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+                  description: Defines affinity used by UStore. learn more in https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
                   properties:
                     label:
                       description: Label key of the cluster nodes to match
@@ -94,8 +94,8 @@ spec:
                       - ReadWriteMany
                       type: string
                     mountPath:
-                      description: Path to mount inside UKV container. This must correspond
-                        with the data path in config map.
+                      description: Path to mount inside UStore container. This must
+                        correspond with the data path in config map.
                       type: string
                     size:
                       description: Size of the requested volume in Gi, Mi, Ti etc'
@@ -108,7 +108,7 @@ spec:
             - message: DB Type value is required once set
               rule: '!has(oldSelf.dbType) || has(self.dbType)'
           status:
-            description: UKVStatus defines the observed state of UKV
+            description: UStoreStatus defines the observed state of UStore
             properties:
               deploymentName:
                 type: string
