@@ -3,20 +3,18 @@ kind: UStore
 metadata:
   labels:
     app.kubernetes.io/name: ustore
-    app.kubernetes.io/instance: ustore-sample-rocksdb
-    app.kubernetes.io/part-of: ukv-operator
+    app.kubernetes.io/instance: ustore-sample-leveldb
+    app.kubernetes.io/part-of: ustore-operator
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: ukv-operator
-  name: ustore-sample-rocksdb
+    app.kubernetes.io/created-by: ustore-operator
+  name: ustore-sample-leveldb
 spec:
   dbServicePort: 38709
-  dbType: "rocksdb"
-  dbConfigMapName: "sample-config-rocksdb"
+  dbType: "leveldb"
+  dbConfigMapName: "sample-config-leveldb"
   memoryLimit: "1Gi"
   concurrencyLimit: "1"
   volumes:
-    - size: 10Gi
+    - size: 5Gi
       accessMode: ReadWriteOnce
       mountPath: /mnt/disk1/
-  
-

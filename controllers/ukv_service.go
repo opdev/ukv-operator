@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	unumv1alpha1 "github.com/itroyano/ukv-operator/api/v1alpha1"
-	"github.com/itroyano/ukv-operator/controllers/utils"
+	unumv1alpha1 "github.com/opdev/ustore-operator/api/v1alpha1"
+	"github.com/opdev/ustore-operator/controllers/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
