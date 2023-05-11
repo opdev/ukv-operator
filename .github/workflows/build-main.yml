@@ -17,7 +17,7 @@ jobs:
        id: push-image
        uses: redhat-actions/push-to-registry@v2
        with:
-         image: "ukv-operator"
+         image: "ustore-operator"
          tags: "latest"
          registry: ${{ secrets.IMAGE_REGISTRY }}
          username: ${{ secrets.REGISTRY_USER }}

@@ -4,12 +4,12 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: ukv-editor-role
+    app.kubernetes.io/instance: ustore-editor-role
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: ukv-operator
-    app.kubernetes.io/part-of: ukv-operator
+    app.kubernetes.io/created-by: ustore-operator
+    app.kubernetes.io/part-of: ustore-operator
     app.kubernetes.io/managed-by: kustomize
-  name: ukv-editor-role
+  name: ustore-editor-role
 rules:
 - apiGroups:
   - unum.cloud

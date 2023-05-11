@@ -1,4 +1,4 @@
-# ukv-operator
+# ustore-operator
 A Go Operator for creating and managing instances of Unum UStore.
 
 For more information on what is an Operator, visit 
@@ -19,13 +19,13 @@ If you wish to debug see the "debugging" section below, and either scale down th
 Next, deploy the user input Custom Resource example Config Map and UStore yaml:
 ```
 oc apply -f config/samples/sample-config-ucset.yaml
-oc apply -f config/samples/unistore_v1alpha1_ukv.yaml 
+oc apply -f config/samples/unum_v1alpha1_ustore_ucset.yaml 
 ```
 Note: there are more yamls under `config/samples`
 
 ### Cleanup
 ```
-oc delete -f config/samples/unistore_v1alpha1_ukv.yaml 
+oc delete -f config/samples/unum_v1alpha1_ustore_ucset.yaml 
 make undeploy
 ```
 
@@ -37,12 +37,12 @@ make docker-build
 make docker-push
 ```
 
-### A push to main branch, triggers image build GH Action. image name: quay.io/itroyano/ukv-operator
+### A push to main branch, triggers image build GH Action. image name: quay.io/opdev/ustore-operator
 
 ## Operator Lifecycle Manager (OLM) Bundle and OpenShift Marketplace integration
 
 To generate bundle manifests use `make bundle`.
-Observe `config/manifests/bases/ukv-operator.clusterserviceversion.yaml` and the `bundle` folder.
+Observe `config/manifests/bases/ustore-operator.clusterserviceversion.yaml` and the `bundle` folder.
 
 To build the bundle image which can be tested, certified and pushed to marketplace use 
 ```

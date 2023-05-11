@@ -1,4 +1,4 @@
-module github.com/itroyano/ukv-operator
+module github.com/opdev/ustore-operator
 
 go 1.19
 

@@ -4,8 +4,8 @@ layout:
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
-projectName: ukv-operator
-repo: github.com/itroyano/ukv-operator
+projectName: ustore-operator
+repo: github.com/opdev/ustore-operator
 resources:
 - api:
     crdVersion: v1
@@ -14,6 +14,6 @@ resources:
   domain: cloud
   group: unum
   kind: ustore
-  path: github.com/itroyano/ukv-operator/api/v1alpha1
+  path: github.com/opdev/ustore-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

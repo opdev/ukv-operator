@@ -4,9 +4,9 @@ metadata:
   labels:
     app.kubernetes.io/name: ustore
     app.kubernetes.io/instance: ustore-sample-affinity
-    app.kubernetes.io/part-of: ukv-operator
+    app.kubernetes.io/part-of: ustore-operator
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: ukv-operator
+    app.kubernetes.io/created-by: ustore-operator
   name: ustore-sample-affinity
 spec:
   dbServicePort: 38709

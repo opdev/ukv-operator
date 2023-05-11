@@ -1,4 +1,8 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- unistore_v1alpha1_ukv.yaml
+- unum_v1alpha1_ustore_leveldb_persist.yaml
+- unum_v1alpha1_ustore_rocksdb_persist.yaml
+- unum_v1alpha1_ustore_ucset.yaml
+- unum_v1alpha1_ustore_ucset_affinity.yaml
+- unum_v1alpha1_ustore_udisk.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
