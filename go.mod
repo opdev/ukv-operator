@@ -3,7 +3,7 @@ module github.com/opdev/ustore-operator
 go 1.19
 
 require (
-	github.com/imdario/mergo v0.3.12
+	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.9.5
 	github.com/onsi/gomega v1.27.7
 	k8s.io/api v0.27.2
