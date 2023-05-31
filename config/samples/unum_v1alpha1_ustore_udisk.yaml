@@ -12,7 +12,7 @@ spec:
   dbServicePort: 38709
   dbType: "udisk"
   dbConfigMapName: "sample-config-udisk"
-  memoryLimit: "1Gi"
+  memoryLimit: "3Gi"
   concurrencyLimit: "1"
   volumes:
     - size: 10Gi
