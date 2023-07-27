@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/imdario/mergo"
@@ -55,6 +56,7 @@ func (r *UStoreReconciler) reconcileDeployment(ctx context.Context, ustoreResour
 		logger.Error(err, "Failed to update Deployment to desired state", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 		return err
 	}
+
 	// update status for deployment
 	ustoreResource.Status.DeploymentName = desiredDeployment.Name
 	ustoreResource.Status.DeploymentStatus = "Successful"
@@ -63,6 +65,7 @@ func (r *UStoreReconciler) reconcileDeployment(ctx context.Context, ustoreResour
 		logger.Error(err, "Failed to update UStore Deployment status")
 		return err
 	}
+
 	return nil
 }
 
@@ -78,121 +81,166 @@ func (r *UStoreReconciler) deploymentForUStore(ustoreResource *unumv1alpha1.USto
 		corev1.ResourceCPU:    resource.MustParse(ustoreResource.Spec.ConcurrencyLimit),
 		corev1.ResourceMemory: resource.MustParse(ustoreResource.Spec.MemoryLimit),
 	}
-	deployment := &appsv1.Deployment{
-		ObjectMeta: utils.SetObjectMeta(ustoreResource.Name, ustoreResource.Namespace, map[string]string{}),
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{{
-						Image: getUStoreImage(ustoreResource),
-						Name:  "ustore",
-						Command: []string{
-							"./" + ustoreResource.Spec.DBType + "_server",
-						},
-						Args: []string{
-							"--config",
-							"$(DBCONFIG)",
-							"--port",
-							"$(DBPORT)",
-						},
-						VolumeMounts: []corev1.VolumeMount{{
-							Name:      "config",
-							MountPath: "/var/lib/ustore/" + ustoreResource.Spec.DBType + "/",
-						}},
-						Resources: corev1.ResourceRequirements{
-							Limits:   resourceLimits,
-							Requests: resourceRequests,
-						},
-						Env: []corev1.EnvVar{
-							{
-								Name:  "DBCONFIG",
-								Value: "/var/lib/ustore/" + ustoreResource.Spec.DBType + "/config.json",
-							},
-							{
-								Name:  "DBPORT",
-								Value: strconv.Itoa(ustoreResource.Spec.DBServicePort),
-							},
-						},
-					}},
-					Volumes: []corev1.Volume{{
-						Name: "config",
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: ustoreResource.Spec.DBConfigMapName,
-								},
-							},
-						},
-					}},
+
+	volumes := []corev1.Volume{
+		{
+			Name: ustore_config_name,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: ustoreResource.Spec.DBConfigMapName,
+					},
 				},
 			},
 		},
 	}
-	r.addVolumesIfNeeded(deployment, ustoreResource)
-	r.addAffinityIfNeeded(deployment, ustoreResource)
+
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name:      ustore_config_name,
+			MountPath: fmt.Sprintf("%s/%s/", ustore_workdir, ustoreResource.Spec.DBType),
+		},
+	}
+
+	volumes, volumeMounts = r.addVolumesIfNeeded(ustoreResource, volumes, volumeMounts)
+
+	containers := []corev1.Container{
+		{
+			Image:   getUStoreImage(ustoreResource),
+			Name:    ustore_container_name,
+			Command: []string{fmt.Sprintf("./%s_server", ustoreResource.Spec.DBType)},
+			Args: []string{
+				"--config",
+				"$(DBCONFIG)",
+				"--port",
+				"$(DBPORT)",
+			},
+			VolumeMounts: volumeMounts,
+			Resources: corev1.ResourceRequirements{
+				Limits:   resourceLimits,
+				Requests: resourceRequests,
+			},
+			Env: []corev1.EnvVar{
+				{
+					Name:  "DBCONFIG",
+					Value: fmt.Sprintf("%s/%s/config.json", ustore_workdir, ustoreResource.Spec.DBType),
+				},
+				{
+					Name:  "DBPORT",
+					Value: strconv.Itoa(ustoreResource.Spec.DBServicePort),
+				},
+			},
+		},
+	}
+
+	podTemplate := corev1.PodTemplateSpec{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: labels,
+		},
+		Spec: corev1.PodSpec{
+			Containers: containers,
+			Volumes:    volumes,
+		},
+	}
+
+	deploymentSpec := appsv1.DeploymentSpec{
+		Replicas: &replicas,
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Template: podTemplate,
+	}
+
+	deployment := &appsv1.Deployment{
+		ObjectMeta: utils.SetObjectMeta(ustoreResource.Name, ustoreResource.Namespace, map[string]string{}),
+		Spec:       deploymentSpec,
+	}
+
+	if affinity := r.addAffinityIfNeeded(ustoreResource); affinity != nil {
+		deployment.Spec.Template.Spec.Affinity = affinity
+	}
+
+	if pullSecrets := r.addPullSecretRefsIfNeeded(ustoreResource); pullSecrets != nil {
+		deployment.Spec.Template.Spec.ImagePullSecrets = pullSecrets
+	}
+
 	// Set UStore instance as the owner and controller
 	ctrl.SetControllerReference(ustoreResource, deployment, r.Scheme)
 	return deployment
 }
 
-func (r *UStoreReconciler) addVolumesIfNeeded(deployment *appsv1.Deployment, ustoreResource *unumv1alpha1.UStore) {
-	for _, volumeMount := range r.GetVolumeList() {
-		if volumeMount.Owner == ustoreResource.Name {
-			containerMount := corev1.VolumeMount{
-				Name:      volumeMount.Name,
-				MountPath: volumeMount.MountPath,
-			}
-			volume := corev1.Volume{
-				Name: volumeMount.Name,
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: volumeMount.ClaimName,
-					},
-				},
-			}
-			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, containerMount)
-			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
+func (r *UStoreReconciler) addVolumesIfNeeded(ustoreResource *unumv1alpha1.UStore, volumes []corev1.Volume, volumeMounts []corev1.VolumeMount) ([]corev1.Volume, []corev1.VolumeMount) {
+	for _, volumeMount := range r.getVolumeList() {
+		if volumeMount.Owner != ustoreResource.Name {
+			continue
 		}
+		containerMount := corev1.VolumeMount{
+			Name:      volumeMount.Name,
+			MountPath: volumeMount.MountPath,
+		}
+		volume := corev1.Volume{
+			Name: volumeMount.Name,
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: volumeMount.ClaimName,
+				},
+			},
+		}
+
+		volumeMounts = append(volumeMounts, containerMount)
+		volumes = append(volumes, volume)
+	}
+
+	return volumes, volumeMounts
+}
+
+func (r *UStoreReconciler) addAffinityIfNeeded(ustoreResource *unumv1alpha1.UStore) *corev1.Affinity {
+	if len(ustoreResource.Spec.NodeAffinityLabels) <= 0 {
+		return nil
+	}
+	preferredSchedulingTerms := []corev1.PreferredSchedulingTerm{}
+
+	for _, labelKeyValue := range ustoreResource.Spec.NodeAffinityLabels {
+		matchExpression := corev1.NodeSelectorRequirement{
+			Key:      labelKeyValue.Label,
+			Operator: corev1.NodeSelectorOpIn,
+			Values:   []string{labelKeyValue.Value},
+		}
+		term := corev1.PreferredSchedulingTerm{
+			Weight: labelKeyValue.Weight,
+			Preference: corev1.NodeSelectorTerm{
+				MatchExpressions: []corev1.NodeSelectorRequirement{matchExpression},
+			},
+		}
+		preferredSchedulingTerms = append(preferredSchedulingTerms, term)
+	}
+
+	return &corev1.Affinity{
+		NodeAffinity: &corev1.NodeAffinity{
+			PreferredDuringSchedulingIgnoredDuringExecution: preferredSchedulingTerms,
+		},
 	}
 }
 
-func (r *UStoreReconciler) addAffinityIfNeeded(deployment *appsv1.Deployment, ustoreResource *unumv1alpha1.UStore) {
-	if len(ustoreResource.Spec.NodeAffinityLabels) > 0 {
-
-		preferredSchedulingTerms := []corev1.PreferredSchedulingTerm{}
-
-		for _, labelKeyValue := range ustoreResource.Spec.NodeAffinityLabels {
-			term := corev1.PreferredSchedulingTerm{
-				Weight: labelKeyValue.Weight,
-				Preference: corev1.NodeSelectorTerm{
-					MatchExpressions: []corev1.NodeSelectorRequirement{
-						{
-							Key:      labelKeyValue.Label,
-							Operator: corev1.NodeSelectorOpIn,
-							Values:   []string{labelKeyValue.Value},
-						},
-					},
-				},
-			}
-			preferredSchedulingTerms = append(preferredSchedulingTerms, term)
-		}
-
-		deployment.Spec.Template.Spec.Affinity = &corev1.Affinity{
-			NodeAffinity: &corev1.NodeAffinity{
-				PreferredDuringSchedulingIgnoredDuringExecution: preferredSchedulingTerms,
-			},
-		}
+func (r *UStoreReconciler) addPullSecretRefsIfNeeded(ustoreResource *unumv1alpha1.UStore) []corev1.LocalObjectReference {
+	if ustoreResource.Spec.DBType != "udisk" {
+		return nil
 	}
+
+	pullSecrets := []corev1.LocalObjectReference{}
+
+	ee_pull_secret := corev1.LocalObjectReference{
+		Name: ustore_ee_pull_secret,
+	}
+
+	pullSecrets = append(pullSecrets, ee_pull_secret)
+
+	return pullSecrets
 }
 
 func getUStoreImage(ustoreResource *unumv1alpha1.UStore) string {
-	// TODO: conditions based on ustoreResource.Spec.DBType.  for now just return latest ucset for testing.
-	return "quay.io/gurgen_yegoryan/ustore:0.12.1"
+	if ustoreResource.Spec.DBType == "udisk" {
+		return ustore_ee_image
+	}
+	return ustore_ce_image
 }

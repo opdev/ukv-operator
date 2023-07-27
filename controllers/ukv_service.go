@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	unumv1alpha1 "github.com/opdev/ustore-operator/api/v1alpha1"
@@ -31,7 +32,7 @@ func (r *UStoreReconciler) reconcileService(ctx context.Context, ustoreResource 
 			return err
 		}
 		// update status for service
-		ustoreResource.Status.ServiceUrl = desiredService.Name + "." + desiredService.Namespace + ".svc.cluster.local" + ":" + strconv.Itoa(ustoreResource.Spec.DBServicePort)
+		ustoreResource.Status.ServiceUrl = fmt.Sprintf("%s.%s.svc.cluster.local:%s", desiredService.Name, desiredService.Namespace, strconv.Itoa(ustoreResource.Spec.DBServicePort))
 		ustoreResource.Status.ServiceStatus = "Successful"
 		err := r.Status().Update(ctx, ustoreResource)
 		if err != nil {
@@ -52,7 +53,7 @@ func (r *UStoreReconciler) reconcileService(ctx context.Context, ustoreResource 
 			return err
 		}
 		// update the status to show the correct url
-		ustoreResource.Status.ServiceUrl = foundSvc.Name + "." + foundSvc.Namespace + ".svc.cluster.local" + ":" + strconv.Itoa(ustoreResource.Spec.DBServicePort)
+		ustoreResource.Status.ServiceUrl = fmt.Sprintf("%s.%s.svc.cluster.local:%s", foundSvc.Name, foundSvc.Namespace, strconv.Itoa(ustoreResource.Spec.DBServicePort))
 		ustoreResource.Status.ServiceStatus = "Successful"
 		_ = r.Status().Update(ctx, ustoreResource)
 	}
@@ -66,7 +67,7 @@ func (r *UStoreReconciler) serviceForUStore(ustoreResource *unumv1alpha1.UStore)
 		ObjectMeta: utils.SetObjectMeta(ustoreResource.Name, ustoreResource.Namespace, utils.LabelsForUStore(ustoreResource.Name)),
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
-				Name:       "db",
+				Name:       ustore_service_port_name,
 				Protocol:   corev1.ProtocolTCP,
 				Port:       int32(ustoreResource.Spec.DBServicePort),
 				TargetPort: intstr.FromInt(ustoreResource.Spec.DBServicePort),
