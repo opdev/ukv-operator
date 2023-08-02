@@ -1,0 +1,46 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sample-config-udisk
+data:
+  config.json: |-
+    {
+     "version": "1.0",
+    "directory": "/mnt/disk1/",
+    "data_directories": [
+        {
+            "path": "/mnt/disk1/data1/",
+            "max_size": "5GB"
+        },
+        {
+            "path": "/mnt/disk1/data2/",
+            "max_size": "5GB"
+        }
+    ],
+    "engine": {
+        "config_url": "",
+        "config_file_path": "",
+        "config": {
+             "version": "1.0",
+    "memory_limit": "3GB",
+    "threads": 1,
+    "gpu_memory_limit": "10GB",
+    "gpu_devices": [
+        -1
+    ],
+    "log_file_name": "udb.log",
+    "io_mechanism": "pulling",
+    "io_queue_depth": 4096,
+    "transaction_max_elements": 10,
+    "transaction_max_bytes": "40KB",
+    "concurrency_limit": 1,
+    "cache_limit": "100MB",
+    "write_buffer_max_elements": 1000,
+    "write_buffer_max_bytes": "10MB",
+    "first_level_max_bytes": "4GB",
+    "level_enlarge_factor": 4,
+    "value_size": "0B",
+    "value_max_size": "4KB"
+        }
+    }
+    }
