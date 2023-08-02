@@ -14,14 +14,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type VolumeToMount struct {
+type volumeToMount struct {
 	Name      string
 	ClaimName string
 	MountPath string
 	Owner     string
 }
 
-var volumeList []VolumeToMount
+var volumeList []volumeToMount
 
 func (r *UStoreReconciler) reconcileVolumesForUStore(ctx context.Context, ustoreResource *unumv1alpha1.UStore) error {
 	logger := log.FromContext(ctx)
@@ -69,7 +69,7 @@ func (r *UStoreReconciler) getOrCreatePersistence(ctx context.Context, name stri
 			return err
 		}
 	}
-	listedVolume := VolumeToMount{
+	listedVolume := volumeToMount{
 		Name:      name,
 		ClaimName: name,
 		MountPath: vol.MountPath,
@@ -82,11 +82,11 @@ func (r *UStoreReconciler) getOrCreatePersistence(ctx context.Context, name stri
 	return nil
 }
 
-func (r *UStoreReconciler) GetVolumeList() []VolumeToMount {
+func (r *UStoreReconciler) getVolumeList() []volumeToMount {
 	return volumeList
 }
 
-func containsVolume(slice []VolumeToMount, element VolumeToMount) bool {
+func containsVolume(slice []volumeToMount, element volumeToMount) bool {
 	for _, a := range slice {
 		if a == element {
 			return true

@@ -70,15 +70,15 @@ func (r *UStoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	if errorVol := r.reconcileVolumesForUStore(ctx, &ustoreResource); errorVol != nil {
-		return ctrl.Result{}, errorVol
+	if err := r.reconcileVolumesForUStore(ctx, &ustoreResource); err != nil {
+		return ctrl.Result{}, err
 	}
 
-	if errorDep := r.reconcileDeployment(ctx, &ustoreResource); errorDep != nil {
-		return ctrl.Result{}, errorDep
+	if err := r.reconcileDeployment(ctx, &ustoreResource); err != nil {
+		return ctrl.Result{}, err
 	}
-	if errSvc := r.reconcileService(ctx, &ustoreResource); errSvc != nil {
-		return ctrl.Result{}, errSvc
+	if err := r.reconcileService(ctx, &ustoreResource); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
